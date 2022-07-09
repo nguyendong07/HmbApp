@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="30sp"
+    android:textAlignment="center"
+    tools:context=".MainActivity">
+
+    <!--    <TextView-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="50sp"-->
+    <!--        android:id="@+id/xValue"-->
+    <!--        app:layout_constraintTop_toTopOf="parent" />-->
+
+    <!--    <TextView-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="50sp"-->
+    <!--        android:id="@+id/yValue"-->
+    <!--        android:layout_marginTop="30sp"-->
+    <!--        app:layout_constraintTop_toTopOf="parent" />-->
+
+
+    <!--    <TextView-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="50sp"-->
+    <!--        android:id="@+id/zValue"-->
+    <!--        android:layout_marginTop="30sp"-->
+    <!--        app:layout_constraintTop_toTopOf="parent" />-->
+
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chart1"
+        android:layout_width="400dp"
+        android:layout_height="215dp">
+
+    </com.github.mikephil.charting.charts.LineChart>
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="388dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="28dp"
+        android:background="@color/teal_200"
+        android:text="Bắt đầu thu nhận dữ liệu"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view" />
+
+    <TextView
+        android:id="@+id/resultView"
+        android:layout_width="351dp"
+        android:layout_height="49dp"
+        android:layout_marginTop="30sp"
+        android:background="@drawable/abc_vector_test"
+        android:text="Hành động đoán được"
+        android:textAlignment="center"
+        android:textColor="#101010"
+        android:textSize="24sp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/result"
+        android:layout_width="match_parent"
+        android:layout_height="209dp"
+        android:text="Đang đoán..."
+        android:textAlignment="center"
+        android:textColor="#131313"
+        android:textSize="20sp" />
+
+</LinearLayout>
