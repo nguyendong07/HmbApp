@@ -59,8 +59,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static String result_sub1_string;
     private static String final_result;
     private float[] acc_3 = new float[4];
-    private Integer TIME_SITE=2;
-    public static int WINDOW_TIME_SITE;
+    private double TIME_SITE=1.35*4;
+    public static double WINDOW_TIME_SITE;
     private static int 	dataCount;
     private int count = 0;
     float ALPHA = 0.1f;
@@ -502,10 +502,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // 2. create Instances object
         ArrayList<Integer> total = new ArrayList<Integer>();
         feature_test = CreateTestData(features);
-        vals[0] = feature_test.get(0);
+        System.out.println("kiem tra features" + feature_test.get(2));
+        for(int f = 0; f <feature_test.size(); f++) {
+            vals[f] = feature_test.get(f);
+        }
+
+        feature_test.clear();
         testing_data.add(new Instance(1, vals));
         testing_data.setClassIndex(testing_data.numAttributes() - 1);
         Instance newInst = testing_data.instance(0);
+        testing_data.delete();
+        System.out.println("kiemtra134" + newInst.toString());
         try {
             result_predict = (int) classifier.classifyInstance(newInst);
             // System.out.println("Ket qua day" + result_predict);
@@ -650,7 +657,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 double [] y = new double[0];
                 double [] z = new double[0];
                 double [] t = new double[0];
-                //System.out.println("diem dau" + RawData_New.get(0).getX());
+                System.out.println("diem dau" + RawData_New.size());
                 for (int k = 0; k < RawData_New.size() ; k++) {
                     X.add(RawData_New.get(k).getX());
                     Y.add(RawData_New.get(k).getY());
@@ -659,9 +666,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 }
                 // in mảng để kiểm tra xem có đè dữ liệu không
-                for (int k = 0; k < RawData_New.size() ; k++) {
+               /* for (int k = 0; k < RawData_New.size() ; k++) {
                     System.out.println(RawData_New.get(k).getX() + "");
-                }
+                }*/
                 //               System.out.println("diem dau" + X.get(0));
                 x = arrlist2arr(X);
                 y = arrlist2arr(Y);
@@ -675,8 +682,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 //System.out.println("x_that" + x[0]);
                 //System.out.println("x" + x[3]);
                 Feature_New = Get44Features(x,y,z,t);
+                //System.out.println("kiem tra" + Feature_New.size());
                 data = arrlist2arr1(Feature_New);
                 result_sub1 = predict44RF(data);
+                System.out.println("kiem tra" + data[1]);
+                System.out.println("kiem tra" + result_sub1);
                 result_sub1_string = ActionResult((int)result_sub1);
                 final_result = FinalResultOne(result_sub1_string);
                 TextView text = (TextView) findViewById(R.id.result);
