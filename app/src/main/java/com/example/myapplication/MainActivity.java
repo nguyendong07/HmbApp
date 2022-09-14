@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.hardware.Sensor;
@@ -28,8 +29,17 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import weka.classifiers.Classifier;
@@ -45,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private LineChart mChart;
     private Thread thread;
     private boolean plotData = true;
+    File myInternalFile;
     private  static MainActivity instance;
     private Handler mHander = new Handler();
     EditText textmsg;
@@ -59,11 +70,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static String result_sub1_string;
     private static String final_result;
     private float[] acc_3 = new float[4];
-    private double TIME_SITE=1.35*4;
+    private double TIME_SITE=1.35*4+0.01;
     public static double WINDOW_TIME_SITE;
     private static int 	dataCount;
     private int count = 0;
     float ALPHA = 0.1f;
+    private static int size_w = 128;
+    private static double over_lap = 0.5;
     private static int OVERLAP_SIZE=1;
     private static int next_windows;
     private static float[] record = new float[4];
@@ -72,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     ArrayList<Double> YList = new ArrayList<Double>();
     ArrayList<Double> ZList = new ArrayList<Double>();
     ArrayList<Double> TList = new ArrayList<Double>();
-
+    FileOutputStream fos = null;
     ArrayList<Double> TestList = new ArrayList<Double>();
 
     ArrayList<Double> X = new ArrayList<Double>();
@@ -88,6 +101,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     ArrayList<AccelData> RawData_New = new ArrayList<AccelData>();
     ArrayList<double[]> arr_1 = new ArrayList<double[]>();
     ArrayList<double[]> arr_2 = new ArrayList<double[]>();
+
+    private static  double[] arr_x;
+    private static  double[] arr_y;
+    private static  double[] arr_z;
+    private static  double[] arr_t;
 
     double [] data;
     public static Classifier classifier;
@@ -120,6 +138,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (accelerometer != null) {
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
+        ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+        File directory = contextWrapper.getDir("result" , Context.MODE_PRIVATE);
+        myInternalFile = new File(directory,   "activity.txt");
+
+
+        try {
+            fos = new FileOutputStream(myInternalFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Button view_activity = (Button) findViewById(R.id.view_act);
+        view_activity.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                ViewAct();
+            }
+        });
 
         Button button = (Button) findViewById(R.id.button2);
         button.setOnClickListener(new View.OnClickListener() {
@@ -211,6 +246,40 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         return CopyRangeFix(arr, i, j);
     }
 
+    public void ViewAct() {
+//        started = false;
+        ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+        StringBuilder sb = new StringBuilder();
+        String [] information = new String [] {};
+        try {
+            File directory = contextWrapper.getDir("result" , Context.MODE_PRIVATE);
+            myInternalFile = new File(directory, "activity.txt");
+            FileInputStream fis = new FileInputStream(myInternalFile);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader bufferedReader = new BufferedReader(isr);
+            try {
+                String line;
+                for( int k = 0; k < 100 ; k++)
+                {
+                    line = bufferedReader.readLine();
+                    if(line != null) {
+                        sb.append(line).append(" ");
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            information = sb.toString().split(" ");
+            TextView ts = (TextView) findViewById(R.id.view_text_act);
+            String act ="";
+            for (int m = 0; m < information.length;m++) {
+                act += information[m] + " ";
+            }
+            ts.setText(act);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
     // Hàm xử lý dữ liệu thô và dự đoán
     public String  ProcessAndPredictFix(int k) {
@@ -269,7 +338,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public double[] arrlist2arr(ArrayList<Double> arr) {
-        int len = 128;
+        int len = arr.size();
         double [] arr_1 = new double[len];
         for (int i = 0; i<len; i++) {
             arr_1[i] = arr.get(i);
@@ -351,25 +420,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         double Activity = fs.getACTIVITY("");
         double Complexity = fs.getCOMPLEXITY("");
         double Mobility = fs.getMOBILITY("");
-        // thuộc tính bổ sung
 
-       /* double xActivity = fs.getACTIVITY("X");
-        double yActivity = fs.getACTIVITY("Y");
-        double zActivity = fs.getACTIVITY("Z");
-        double pActivity = fs.getACTIVITY("P");
-        double tActivity = fs.getACTIVITY("T");
-        double xMobility = fs.getMOBILITY("X");
-        double yMobility = fs.getMOBILITY("Y");
-        double zMobility = fs.getMOBILITY("Z");
-        double pMobility = fs.getMOBILITY("P");
-        double tMobility = fs.getMOBILITY("T");
-        double xComplexity  = fs.getCOMPLEXITY("X");
-        double yComplexity  = fs.getCOMPLEXITY("Y");
-        double zComplexity  = fs.getCOMPLEXITY("Z");
-        double pComplexity  = fs.getCOMPLEXITY("P");
-        double tComplexity  = fs.getCOMPLEXITY("T");*/
-
-        // Thêm vào mảng tập thuộc tính
         arr.add(ARA);
         //System.out.println("Ara" + ARA);
         arr.add(MeanX);
@@ -502,7 +553,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // 2. create Instances object
         ArrayList<Integer> total = new ArrayList<Integer>();
         feature_test = CreateTestData(features);
-        System.out.println("kiem tra features" + feature_test.get(2));
+//        System.out.println("kiem tra features" + feature_test.get(2));
         for(int f = 0; f <feature_test.size(); f++) {
             vals[f] = feature_test.get(f);
         }
@@ -512,7 +563,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         testing_data.setClassIndex(testing_data.numAttributes() - 1);
         Instance newInst = testing_data.instance(0);
         testing_data.delete();
-        System.out.println("kiemtra134" + newInst.toString());
+//        System.out.println("kiemtra134" + newInst.toString());
         try {
             result_predict = (int) classifier.classifyInstance(newInst);
             // System.out.println("Ket qua day" + result_predict);
@@ -628,6 +679,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
+//    public static double[] CopyArr( double []x , int k, int count){
+//        return Arrays.copyOf(x, k, )
+//    }
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         if(plotData){
@@ -657,37 +711,98 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 double [] y = new double[0];
                 double [] z = new double[0];
                 double [] t = new double[0];
-                System.out.println("diem dau" + RawData_New.size());
+
+                // xử lý luồng dữ liệu thô
+//                if (RawData_New.size()%size_w>100) {
+//                    RawData_New.add(RawData_New.get(RawData_New.size()));
+//                }
+//                else if (RawData_New.size()%size_w < 2) {
+//                    RawData_New.remove(RawData_New.get(RawData_New.size()));
+//                }
+
+                System.out.println("Size cua rawdata" + RawData_New.size());
                 for (int k = 0; k < RawData_New.size() ; k++) {
                     X.add(RawData_New.get(k).getX());
                     Y.add(RawData_New.get(k).getY());
                     Z.add(RawData_New.get(k).getZ());
                     T.add((double)RawData_New.get(k).getTimestamp());
-
                 }
-                // in mảng để kiểm tra xem có đè dữ liệu không
-               /* for (int k = 0; k < RawData_New.size() ; k++) {
-                    System.out.println(RawData_New.get(k).getX() + "");
-                }*/
-                //               System.out.println("diem dau" + X.get(0));
+                System.out.println("arr_x" + X.size());
+                double f = RawData_New.size()/(size_w*over_lap);
+
                 x = arrlist2arr(X);
+                System.out.println("arr_x" + X.size());
                 y = arrlist2arr(Y);
                 z = arrlist2arr(Z);
                 t = arrlist2arr(T);
+
+
                 X.clear();
                 Y.clear();
                 Z.clear();
                 T.clear();
-                //System.out.println("x_test" + TestList.get(0));
-                //System.out.println("x_that" + x[0]);
-                //System.out.println("x" + x[3]);
-                Feature_New = Get44Features(x,y,z,t);
-                //System.out.println("kiem tra" + Feature_New.size());
-                data = arrlist2arr1(Feature_New);
-                result_sub1 = predict44RF(data);
-                System.out.println("kiem tra" + data[1]);
-                System.out.println("kiem tra" + result_sub1);
-                result_sub1_string = ActionResult((int)result_sub1);
+
+                int [] total = new int [] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                for (int j = 0; j < 7 ; j++) {
+
+                    if (j == 0) {
+                        arr_x = Arrays.copyOfRange(x,0,size_w);
+                        arr_y = Arrays.copyOfRange(y,0,size_w);
+                        arr_z = Arrays.copyOfRange(z,0,size_w);
+                        arr_t = Arrays.copyOfRange(t,0,size_w);
+
+                    }
+                    else if(j > 0) {
+//                        System.out.println("j" + j);
+
+                        arr_x = Arrays.copyOfRange(x, (int)(j * size_w * (1 - over_lap)),  (int)(j * size_w * (1 - over_lap) + size_w));
+                        arr_y = Arrays.copyOfRange(y, (int)(j * size_w * (1 - over_lap)),  (int)(j * size_w * (1 - over_lap) + size_w));
+                        arr_z = Arrays.copyOfRange(z, (int)(j * size_w * (1 - over_lap)),  (int)(j * size_w * (1 - over_lap) + size_w));
+                        arr_t = Arrays.copyOfRange(t, (int)(j * size_w * (1 - over_lap)),  (int)(j * size_w * (1 - over_lap) + size_w));
+                    }
+                    Feature_New = Get44Features(arr_x,arr_y,arr_z,arr_t);
+                    //System.out.println("kiem tra" + Feature_New.size());
+                    data = arrlist2arr1(Feature_New);
+                    result_sub1 = predict44RF(data);
+                    try {
+                        String lineSeparator = System.getProperty("line.separator");
+                        //Mở file
+
+                        fos.write(ActionResult((int)result_sub1).getBytes(StandardCharsets.UTF_8));
+                        fos.write(lineSeparator.getBytes());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    switch((int)result_sub1){
+                        case 0 : total[0] +=1;
+                        case 1 : total[1] +=1;
+                        case 2 : total[2] +=1;
+                        case 3 : total[3] +=1;
+                        case 4 : total[4] +=1;
+                        case 5 : total[5] +=1;
+                        case 6 : total[6] +=1;
+                        case 7 : total[7] +=1;
+                        case 8 : total[8] +=1;
+                        case 9 : total[9] +=1;
+                        case 10 : total[10] +=1;
+                        case 11 : total[11] +=1;
+                        case 12 : total[12] +=1;
+                        case 13 : total[13] +=1;
+                        case 14 : total[14] +=1;
+                    }
+//                    System.out.println("kiem tra" + data[1]);
+//                    System.out.println("kiem tra" + result_sub1);
+                }
+                int max = total[0];
+                int index = 0;
+                for (int l = 0; l < total.length; l ++) {
+                    if (total[l] > max) {
+                        max = total[l];
+                        index = l;
+                    }
+                }
+
+                result_sub1_string = ActionResult(index);
                 final_result = FinalResultOne(result_sub1_string);
                 TextView text = (TextView) findViewById(R.id.result);
                 text.setText(final_result);
