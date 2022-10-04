@@ -10,30 +10,37 @@
  */
 package com.example.myapplication;
 
+
+
+import java.util.ArrayList;
+
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.stat.correlation.Covariance;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
-import org.apache.commons.math3.transform.TransformType;
+import org.apache.commons.math3.transform.TransformType;;
+//import org.apache.commons.math3.complex.Complex;
+//import org.apache.commons.math3.stat.correlation.Covariance;
+//import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+//import org.apache.commons.math3.transform.DftNormalization;
+//import org.apache.commons.math3.transform.FastFourierTransformer;
+//import org.apache.commons.math3.transform.TransformType;
 
 
 public class FeaturesStatistic {
-
     //private  int WINDOWN_LENGTH_IN_SECOND ;
-    private  double WINDOWN_LENGTH_IN_SECOND ;
-
     private static final String X = "x";
     private static final String Y = "y";
     private static final String Z = "z";
     private double[] x;
     private double[] y;
     private double[] z;
-
-    private double[] x1;
+    
+    private double[] x1; 
     private double[] y1;
     private double[] z1;
-
+    
     private double[] timestamp;
 
     private DescriptiveStatistics statisticX;
@@ -45,80 +52,72 @@ public class FeaturesStatistic {
 
     private FastFourierTransformer fastFourierTransformer;
 
-    public FeaturesStatistic(double[] x, double[] y, double[] z, double wdlenght, double[] timestamp, int READING_PER_SECOND) {
-
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.timestamp = timestamp;
-        this.WINDOWN_LENGTH_IN_SECOND =wdlenght;
-        int FFTlength[] = {16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384};
-        int windowsize= FFTlength[(int)wdlenght] ;
-        double[] x1 = new double[windowsize];
-        double[] y1 = new double[windowsize];
-        double[] z1 = new double[windowsize];
-        for(int k= 0; k<x.length; k++)
-        {
-            x1[k]=x[k];
-        }
-
-        for(int k= 0; k<y.length; k++)
-        {
-            y1[k]=y[k];
-        }
-
-        for(int k= 0; k<z.length; k++)
-        {
-            z1[k]=z[k];
-        }
-
-        this.x1 = x1;
-        this.y1 = y1;
-        this.z1 = z1;
-        statisticX = new DescriptiveStatistics(x);
-        statisticY = new DescriptiveStatistics(y);
-        statisticZ = new DescriptiveStatistics(z);
-        covariance = new Covariance();
-        fastFourierTransformer = new FastFourierTransformer(DftNormalization.STANDARD);
-    }
-
-
     public FeaturesStatistic(double[] x, double[] y, double[] z, double wdlenght, double[] timestamp) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.timestamp = timestamp;
-        this.WINDOWN_LENGTH_IN_SECOND =wdlenght;
-        int FFTlength[] = {16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384};
-        int windowsize= FFTlength[(int)wdlenght] ;
-        double[] x1 = new double[windowsize];
-        double[] y1 = new double[windowsize];
-        double[] z1 = new double[windowsize];
-        for(int k= 0; k<x.length; k++)
-        {
-            x1[k]=x[k];
-        }
-
-        for(int k= 0; k<y.length; k++)
-        {
-            y1[k]=y[k];
-        }
-
-        for(int k= 0; k<z.length; k++)
-        {
-            z1[k]=z[k];
-        }
-
-        this.x1 = x1;
-        this.y1 = y1;
-        this.z1 = z1;
+    	
+    	 this.x = x;
+         this.y = y;
+         this.z = z;
+         this.timestamp = timestamp;
+    	
+    	
+    	
+    	//System.out.println("wdlenght   " +  (int) wdlenght);
+    	//them moi 1024, 2048
+    	int FFTlength[] = {16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384};    	
+    	
+    	int windowsize= FFTlength[(int)wdlenght] ;  	
+    	
+    	//if
+    	//for(int kk=0;kk<FFTlength.length;kk++)
+    	//{
+    	//	if(FFTlength[kk] >= windowsize)
+    	//		windowsize=FFTlength[kk];    			
+    	//}
+    	
+ 
+    	double[] x1 = new double[windowsize]; 
+    	double[] y1 = new double[windowsize];
+    	double[] z1 = new double[windowsize];
+    	
+    	//System.out.println("x1   " + x1.length);
+    	//System.out.println( "x   " + x.length);
+    	
+    	
+    	for(int k= 0; k<x.length; k++)
+    	{
+    		x1[k]=x[k];
+    	}
+    	
+    	for(int k= 0; k<y.length; k++)
+    	{
+    		y1[k]=y[k];
+    	}
+    	
+    	for(int k= 0; k<z.length; k++)
+    	{
+    		z1[k]=z[k];
+    	}
+    	
+    	 this.x1 = x1;
+         this.y1 = y1;
+         this.z1 = z1;
+         
+    	//x1 = Arrays.copyOfRange(x, 0, x.length);
+    	
+    	
+    	//System.arraycopy(x, 0, x1, 0, x.length);      
+    	
+    	//System.out.println(x1);
+    	//System.out.println(x1.length);
+    	
         statisticX = new DescriptiveStatistics(x);
         statisticY = new DescriptiveStatistics(y);
         statisticZ = new DescriptiveStatistics(z);
         covariance = new Covariance();
         fastFourierTransformer = new FastFourierTransformer(DftNormalization.STANDARD);
     }
-
+///Ä�oáº¡n chÆ°Æ¡ng trÃ¬nh táº¡o cÃ¡c thuá»™c tÃ­nh cá»§a data
+    
     private Complex[] getFFT(int length, String type){
         if (type.equals(X)){
             Complex[] xFFT = new Complex[x1.length];
@@ -146,11 +145,15 @@ public class FeaturesStatistic {
         }
     }
 
-    //tinh trung binh 1 khoang ;
-
+    //tinh trung binh 1 khoang ; 
+    
     public double getXFFTEnergy(){
-        int length = x1.length;
-        int khoang=length/10;
+    	
+    	//System.out.println(x.length);
+    	//System.out.println(x1.length);
+    	
+    	int length = x1.length;
+    	int khoang=length/10;
         Complex[] xFFT = getFFT(length,X);
         double sumXFFEnergy = 0;
         for (int i = (length/4 -khoang) ; i < (length/4+khoang); i++){
@@ -187,22 +190,22 @@ public class FeaturesStatistic {
         double sumXFFTComponents = 0;
         for (int i = 0; i < length; i++){
             sumXFFTComponents += xFFT[i].getReal();
-
+            
         }
-        //   System.out.print("\nGia tri sumXFFTComponents la:"+ sumXFFTComponents);
+     //   System.out.print("\nGia tri sumXFFTComponents la:"+ sumXFFTComponents);
 
         double sumXFFTEntropy = 0;
         double pi;
         for (int i = 0; i < length; i++){
-
+        	
             pi = xFFT[i].getReal()/sumXFFTComponents;
             if(pi==0){
-                sumXFFTEntropy = sumXFFTEntropy +0 ;
+            	sumXFFTEntropy = sumXFFTEntropy +0 ;
             }else{
-                sumXFFTEntropy = sumXFFTEntropy + pi * Math.log(Math.abs(pi));
-            }
+            	sumXFFTEntropy = sumXFFTEntropy + pi * Math.log(Math.abs(pi));	
+            }                           
         }
-        //  System.out.print("\nGia tri Entropy la:"+ sumXFFTEntropy);
+      //  System.out.print("\nGia tri Entropy la:"+ sumXFFTEntropy);
         return -(sumXFFTEntropy/length);
     }
 
@@ -218,7 +221,7 @@ public class FeaturesStatistic {
         double pi;
         for (int i = 0; i < length; i++){
             pi = yFFT[i].getReal()/sumYFFTComponents;
-
+            
             sumYFFTEntropy += pi*Math.log(Math.abs(pi));
         }
         return -(sumYFFTEntropy/length);
@@ -226,7 +229,7 @@ public class FeaturesStatistic {
 
     public double getZFFTEntropy(){
         int length = z1.length;
-
+        
         Complex[] zFFT = getFFT(length,Z);
         double sumZFFTComponents = 0;
         for (int i = 0; i < length; i++){
@@ -248,6 +251,22 @@ public class FeaturesStatistic {
         for (int i = 0; i < length; i++){
             sumSQRT += Math.sqrt((x[i] * x[i]) + (y[i] * y[i]) + (z[i] * z[i]));
         }
+        
+//        for (int i = 0; i < length; i++){
+//       	 System.out.print(x[i] + " ");
+//        }
+//        
+//        System.out.println("end");
+//        for (int i = 0; i < length; i++){
+//       	 System.out.print(y[i] + " ");
+//        }
+//        System.out.println("end");
+//        for (int i = 0; i < length; i++){
+//        	 System.out.print(z[i] + " ");
+//        }
+//        System.out.println("end");
+//        System.out.println(x.length);
+//        System.out.println(sumSQRT/length);
         return sumSQRT/length;
     }
 
@@ -309,7 +328,7 @@ public class FeaturesStatistic {
 
         for (int i=0; i<size-1; i++){
             //if((x[i]>=0 && x[i+1]<0) || (x[i]<0 && x[i+1]>=0)){
-            if((x[i]*x[i+1]<=0)){
+        	if((x[i]*x[i+1]<=0)){
                 numZC++;
             }
         }
@@ -323,7 +342,7 @@ public class FeaturesStatistic {
 
         for (int i=0; i<size-1; i++){
             //if((y[i]>=0 && y[i+1]<0) || (y[i]<0 && y[i+1]>=0)){
-            if((y[i]*y[i+1]<=0)){
+        	if((y[i]*y[i+1]<=0)){
                 numZC++;
             }
         }
@@ -350,88 +369,88 @@ public class FeaturesStatistic {
         }
         return new DescriptiveStatistics(xyz).getMean();
     }
-
+    
     // New feature 20170802 adding 8 feature
-    public double getPARX(){
-        //DOCME18
-        double PAR =0;
-        double avg = statisticX.getMean();
-        double m = statisticX.getMax();
-        if (avg !=0 ){
-            PAR = m/avg;
-
-        }
-        return PAR;
-
+    public double getPARX(){ 
+    	//DOCME18 
+    	double PAR =0;
+    	double avg = statisticX.getMean();
+    	double m = statisticX.getMax();
+    	if (avg !=0 ){
+    		PAR = m/avg;
+    		
+    	}
+    	return PAR;
+    	
     }
     //
     public double getPARY(){
-        //DOCME18
-        double PAR =0;
-        double avg = statisticY.getMean();
-        double m = statisticY.getMax();
-        if (avg !=0 ){
-            PAR = m/avg;
-
-        }
-        return PAR;
-
+    	//DOCME18 
+    	double PAR =0;
+    	double avg = statisticY.getMean();
+    	double m = statisticY.getMax();
+    	if (avg !=0 ){
+    		PAR = m/avg;
+    		
+    	}
+    	return PAR;
+    	
     }
     //
     public double getPARZ(){
-        //DOCME18
-        double PAR =0;
-        double avg = statisticZ.getMean();
-        double m = statisticZ.getMax();
-        if (avg !=0 ){
-            PAR = m/avg;
-
-        }
-        return PAR;
-
+    	//DOCME18 
+    	double PAR =0;
+    	double avg = statisticZ.getMean();
+    	double m = statisticZ.getMax();
+    	if (avg !=0 ){
+    		PAR = m/avg;
+    		
+    	}
+    	return PAR;
+    	
     }
-
-
+       
+    
     public double getSMA() {
         //DOCME: function (28)
-
+           
         double total = 0;
         int windowsize = x.length;
         for (int i = 2; i < windowsize; i++) {
-
+           
             double firstArg = Math.abs(x[i-1]) + Math.abs(x[i])
                     + Math.abs(y[i-1]) + Math.abs(y[i])
                     + Math.abs(z[i-1]) + Math.abs(z[i]);
             double secondArg = timestamp[i] - timestamp[i-1];
             total = total + firstArg*secondArg;
         }
-
+       
         return ((1 * total) / (2*windowsize));
-
+       
     }
     public double getSMAX() {
         //DOCME: function (28)
-
+           
         double total = 0;
         int windowsize = x.length;
-        //    System.out.print("\nCua so la: "+windowsize);
+    //    System.out.print("\nCua so la: "+windowsize);
         for (int i = 2; i < windowsize; i++) {
             double firstArg = Math.abs(x[i-1]) + Math.abs(x[i]);
             double secondArg = timestamp[i] - timestamp[i-1];
             total = total + firstArg*secondArg ;
-
+           
         }
-
+       
         return ((1 * total) / (2*windowsize));
-
+        
     }
     public double getSMAY() {
         //DOCME: function (28)
-
+           
         double total = 0;
-        int windowsize = x.length;
+        int windowsize = x.length; 
         for (int i = 1; i < windowsize; i++) {
-
+           
             double firstArg =  Math.abs(y[i-1]) + Math.abs(y[i]);
             double secondArg = timestamp[i] - timestamp[i-1];
             total = total + firstArg*secondArg ;
@@ -440,11 +459,11 @@ public class FeaturesStatistic {
     }
     public double getSMAZ() {
         //DOCME: function (28)
-
+           
         double total = 0;
         int windowsize = x.length;
         for (int i = 2; i < windowsize; i++) {
-
+           
             double firstArg = Math.abs(z[i-1]) + Math.abs(z[i]);
             double secondArg = timestamp[i] - timestamp[i-1];
             total = total +  firstArg * secondArg;
@@ -454,11 +473,11 @@ public class FeaturesStatistic {
 
     public double getDSVM() {
         //DOCME: function (33)
-        int windowsize = x.length;
+    	int windowsize = x.length;
 
         double total = 0;
         for (int i = 2; i < windowsize; i++) {
-
+            
             double ax = Math.abs(x[i] - x[i-1]);
             double ay = Math.abs(y[i] - y[i-1]);
             double az = Math.abs(z[i] - z[i-1]);
@@ -468,289 +487,642 @@ public class FeaturesStatistic {
 
         return (total / windowsize);
     }
-
+    
     // calculate Hjorth parameter values Activity Mobility and Complexity
     public double getACTIVITY(String Kind){// return acvitity value depend on x , y or z
-        int windowsize = x.length;
-        String _Kind = Kind;
-        double A =0;
-        double d=0;
-        double tmp = 0;
-        for (int i = 0; i<windowsize -1 ;i ++){
-            switch(_Kind){
-
-                case "X":
-                    tmp =  x[i+1]-x[i];
-                    break;
-                case "Y":
-                    tmp =  y[i+1]-y[i];
-                    break;
-                case "Z":
-                    tmp =  z[i+1]-z[i];
-                    break;
-                case "P":
-                    tmp =  phiAngle(i+1)-phiAngle(i);
-                    break;
-                case "T":
-                    tmp =  thetaAngle(i+1)-thetaAngle(i);
-                    break;
-                default:
-                    break;
-            }
-
-            d = d +  Math.pow(tmp, 2);
-
-        }
-        A = d/(windowsize -1);
-        return A;
-
+    	int windowsize = x.length;
+    	String _Kind = Kind;
+    	double A =0;
+    	double d=0;
+    	double tmp = 0;
+    	for (int i = 0; i<windowsize -1 ;i ++){
+    		switch(_Kind){
+    		
+    		case "X":
+    			tmp =  x[i+1]-x[i];    			
+    			break;
+    		case "Y":
+    			tmp =  y[i+1]-y[i];
+    			break;
+    		case "Z":
+    			tmp =  z[i+1]-z[i];
+    			break;
+    		case "P":
+    			tmp =  phiAngle(i+1)-phiAngle(i);
+    			break;
+    		case "T":
+    			tmp =  thetaAngle(i+1)-thetaAngle(i);
+    			break;
+    		default:
+    			break;
+    		}
+    		
+    		d = d +  Math.pow(tmp, 2);
+    		
+    	}
+    	A = d/(windowsize -1);
+    	return A;
+    	
     }
-
+      
     // Mobility function
     public double getMOBILITY(String Kind){// return acvitity value depend on x , y or z
-        int windowsize = x.length;
-        String _Kind = Kind;
-        double M =0;
-        double m=0;
-        double tmp = 0;
-        for (int i = 0; i<windowsize -2 ;i ++){
-            switch(_Kind){
-
-                case "X":
-                    tmp =  x[i+2] + x[i];
-                    break;
-                case "Y":
-                    tmp =  y[i+2] + y[i];
-                    break;
-                case "Z":
-                    tmp =  z[i+2] + z[i];
-                    break;
-                case "P":
-                    tmp =  phiAngle(i+2) + phiAngle(i);
-                    break;
-                case "T":
-                    tmp =  thetaAngle(i+2) + thetaAngle(i);
-                    break;
-                default:
-                    break;
-            }
-
-            m = m + Math.pow(tmp,2);
-
-        }
-
-        m= m/(windowsize-2);
-        double ac = getACTIVITY(_Kind);
-        if(ac !=0){
-            M = Math.sqrt(m/ac);
-        }
-
-        return M;
-
+    	int windowsize = x.length;
+    	String _Kind = Kind;
+    	double M =0;
+    	double m=0;
+    	double tmp = 0;
+    	for (int i = 0; i<windowsize -2 ;i ++){
+    		switch(_Kind){
+    		
+    		case "X":
+    			tmp =  x[i+2] + x[i];
+    			break;
+    		case "Y":
+    			tmp =  y[i+2] + y[i];
+    			break;
+    		case "Z":
+    			tmp =  z[i+2] + z[i];
+    			break;
+    		case "P":
+    			tmp =  phiAngle(i+2) + phiAngle(i);
+    			break;
+    		case "T":
+    			tmp =  thetaAngle(i+2) + thetaAngle(i);
+    			break;
+    		default:
+    			break;
+    		}
+    		
+    		m = m + Math.pow(tmp,2);
+    		
+    	}
+    	
+    	m= m/(windowsize-2);
+    	double ac = getACTIVITY(_Kind);
+		if(ac !=0){
+			M = Math.sqrt(m/ac);
+		}
+    	
+    	return M;
+    	
     }
-
+    
     // Get Complexity function
     public double getCOMPLEXITY(String Kind){// return acvitity value depend on X, Y or Z
-        int windowsize = x.length;
-        String _Kind = Kind;
-        double M =0;
-        double m=0;
-        double tmp = 0;
-        for (int i = 0; i<windowsize -3 ;i ++){
-            switch(_Kind){
-
-                case "X":
-                    tmp =  x[i+3] -x[i+2] + x[i+1]-x[i];
-                    break;
-                case "Y":
-                    tmp =  x[i+3] -x[i+2] + x[i+1]-x[i];
-                    break;
-                case "Z":
-                    tmp =  x[i+3] -x[i+2] + x[i+1]-x[i];
-                    break;
-                case "P":
-                    tmp =  phiAngle(i+3) -phiAngle(i+2) + phiAngle(i+1)-phiAngle(i);
-                    break;
-                case "T":
-                    tmp =  thetaAngle(i+3) -thetaAngle(i+2) + thetaAngle(i+1)-thetaAngle(i);
-                    break;
-                default:
-                    break;
-            }
-
-            m = m + Math.pow(tmp,2);
-
-        }
-
-        m= m/(windowsize-3);
-        double mb = getMOBILITY(_Kind);
-        if(mb !=0){
-            M = Math.sqrt(m/mb);
-        }
-
-        return M;
-
+    	int windowsize = x.length;
+    	String _Kind = Kind;
+    	double M =0;
+    	double m=0;
+    	double tmp = 0;
+    	for (int i = 0; i<windowsize -3 ;i ++){
+    		switch(_Kind){
+    		
+    		case "X":
+    			tmp =  x[i+3] -x[i+2] + x[i+1]-x[i];
+    			break;
+    		case "Y":
+    			tmp =  x[i+3] -x[i+2] + x[i+1]-x[i];
+    			break;
+    		case "Z":
+    			tmp =  x[i+3] -x[i+2] + x[i+1]-x[i];
+    			break;
+    		case "P":
+    			tmp =  phiAngle(i+3) -phiAngle(i+2) + phiAngle(i+1)-phiAngle(i);
+    			break;
+    		case "T":
+    			tmp =  thetaAngle(i+3) -thetaAngle(i+2) + thetaAngle(i+1)-thetaAngle(i);
+    			break;
+    		default:
+    			break;
+    		}
+    		
+    		m = m + Math.pow(tmp,2);
+    		
+    	}
+    	
+    	m= m/(windowsize-3);
+    	double mb = getMOBILITY(_Kind);
+		if(mb !=0){
+			M = Math.sqrt(m/mb);
+		}
+    	
+    	return M;
+    	
     }
     //************************The values of angle************************************//
-
+    
     public double phiAngle(int i){ // return value of phi at k
-
-        double phi = 0;
-
-        if(Math.sqrt(Math.pow(x[i], 2)+ Math.pow(z[i],2 ))!=0){
-            phi = Math.atan(y[i] / Math.sqrt(Math.pow(x[i], 2)+ Math.pow(z[i],2 )));
-        }
-
-        if(phi != 0){
-            phi = 1/phi;
-        }
-        //System.out.print("\nGia tri Phi la: "+phi);
-        return phi;
+    	
+    	double phi = 0;
+    	
+    	if(Math.sqrt(Math.pow(x[i], 2)+ Math.pow(z[i],2 ))!=0){
+    		phi = Math.atan(y[i] / Math.sqrt(Math.pow(x[i], 2)+ Math.pow(z[i],2 )));
+    	}
+    	
+    	if(phi != 0){
+    		phi = 1/phi;
+    	}
+    	//System.out.print("\nGia tri Phi la: "+phi);
+    	return phi;
     }
-
+    
     // value of theta
-
-    public double thetaAngle(int i){ // return value of phi at k
-
-        double theta = 0;
-        if(z[i]!=0){
-            //theta = Math.tan(y[i] / z[i]);
-            theta = Math.atan(-x[i] / z[i]);
-        }
-
-        if(theta != 0){
-            theta = 1/theta;
-        }
-
-        return theta;
+    
+public double thetaAngle(int i){ // return value of phi at k
+    	
+    	double theta = 0;
+    	if(z[i]!=0){
+    		//theta = Math.tan(y[i] / z[i]);
+    		theta = Math.atan(-x[i] / z[i]);
+    	}
+    	
+    	if(theta != 0){
+    		theta = 1/theta;
+    	}
+    	
+    	return theta;
     }
 // Ig phi
 
-    public double igPhi(int i ){// prepared  for getIgPhi function
-        double iphi =0;
+public double igPhi(int i ){// prepared  for getIgPhi function
+	double iphi =0;
+	
+	if((phiAngle(i)+ phiAngle(i-1))* (timestamp[i]-timestamp[i-1])!=0){
+		iphi =  1/(2* (phiAngle(i)+ phiAngle(i-1))* (timestamp[i]-timestamp[i-1])); 
+	}	
+	
+	//System.out.print("\nGia tri iphi la: "+ iphi);
+return iphi;	
+}
 
-        if((phiAngle(i)+ phiAngle(i-1))* (timestamp[i]-timestamp[i-1])!=0){
-            iphi =  1/(2* (phiAngle(i)+ phiAngle(i-1))* (timestamp[i]-timestamp[i-1]));
-        }
-
-        //System.out.print("\nGia tri iphi la: "+ iphi);
-        return iphi;
-    }
-
-    //
-    public double igTheta(int i ){// prepared  for getIgTheta function
-        double iTheta =0;
-
-        if((thetaAngle(i)+ thetaAngle(i-1))* (timestamp[i]-timestamp[i-1])!=0){
-            iTheta = 1/(2* (thetaAngle(i)+ thetaAngle(i-1))* (timestamp[i]-timestamp[i-1]));
-        }
-
-        return iTheta;
-    }
+//
+public double igTheta(int i ){// prepared  for getIgTheta function
+	double iTheta =0;
+	
+	if((thetaAngle(i)+ thetaAngle(i-1))* (timestamp[i]-timestamp[i-1])!=0){
+		iTheta = 1/(2* (thetaAngle(i)+ thetaAngle(i-1))* (timestamp[i]-timestamp[i-1]));
+	}
+			
+return iTheta;	
+}
 
     // Mean phi DOCME 14
-    public double getMeanPhi(){
-        double mphi =0;
-        int wsize = x.length;
-        for (int i = 1; i<wsize;i++){
-            mphi = mphi + phiAngle(i);
-
-        }
-        return mphi/wsize;
-    }
-    // Mean theta DOCME 14
-    public double getMeanTheta(){
-
-        double mtheta =0;
-        int wsize = x.length;
-        for (int i = 1; i<wsize;i++){
-            mtheta = mtheta + thetaAngle(i);
-
-        }
-        return mtheta/wsize;
-    }
+public double getMeanPhi(){
+	double mphi =0;
+	int wsize = x.length;
+	for (int i = 1; i<wsize;i++){
+		mphi = mphi + phiAngle(i);
+		
+	}
+		return mphi/wsize;
+}
+// Mean theta DOCME 14
+public double getMeanTheta(){ 
+	
+	double mtheta =0;
+	int wsize = x.length;
+	for (int i = 1; i<wsize;i++){
+		mtheta = mtheta + thetaAngle(i);
+		
+	}
+		return mtheta/wsize;
+}
 // The variance of phi angle
 
-    public double getVariancePhi(){
-        double vphi =0;
-        double tmp = 0;
-        int wsize = x.length;
-        for (int i = 0; i<wsize;i++){
-            tmp = tmp + Math.pow(phiAngle(i) + getMeanPhi(), 2) ;
-        }
-        vphi = tmp/wsize;
-        return vphi;
-    }
-    // The variance of theta angle
-    public double getVarianceTheta(){
-        double vtheta =0;
-        double tmp = 0;
-        int wsize = x.length;
-        for (int i = 0; i<wsize;i++){
-            tmp = tmp + Math.pow(thetaAngle(i) + getMeanTheta(), 2) ;
-        }
-        vtheta = tmp/wsize;
-        return vtheta;
-    }
-    // the velocity angle changing value base on integrated
-    public double getIgPhi(){ //
-        double igphi =0;
-        double tmp = 0;
-        int wsize = x.length;
-        for (int i = 1; i<wsize; i++){
-            tmp = tmp + igPhi(i);
+public double getVariancePhi(){
+	double vphi =0;
+	double tmp = 0;
+	int wsize = x.length;
+	for (int i = 0; i<wsize;i++){
+		tmp = tmp + Math.pow(phiAngle(i) + getMeanPhi(), 2) ;
+		}
+	vphi = tmp/wsize;
+		return vphi;
+}
+// The variance of theta angle
+public double getVarianceTheta(){
+	double vtheta =0;
+	double tmp = 0;
+	int wsize = x.length;
+	for (int i = 0; i<wsize;i++){
+		tmp = tmp + Math.pow(thetaAngle(i) + getMeanTheta(), 2) ;
+		}
+	vtheta = tmp/wsize;
+		return vtheta;
+}
+// the velocity angle changing value base on integrated
+public double getIgPhi(){ // 
+	double igphi =0;
+	double tmp = 0;
+	int wsize = x.length;
+	for (int i = 1; i<wsize; i++){
+		tmp = tmp + igPhi(i);
+				
+	}
+	igphi = tmp;
+	return igphi;
+}
 
-        }
-        igphi = tmp;
-        return igphi;
-    }
-
-    //
-    public double getIgTheta(){ //
-        double igtheta =0;
-        double tmp = 0;
-        int wsize = x.length;
-        for (int i = 1; i<wsize; i++){
-            tmp = tmp + igTheta(i);
-        }
-        igtheta = tmp;
-        return igtheta;
-
-    }
+//
+public double getIgTheta(){ // 
+	double igtheta =0;
+	double tmp = 0;
+	int wsize = x.length;
+	for (int i = 1; i<wsize; i++){
+		tmp = tmp + igTheta(i);
+	}
+	igtheta = tmp;
+	return igtheta;
+	
+}
 
     //**************************End of angle**********************************//
 
     // get the max of array for statistic
     public double getMax(double[] a) {
         //
-        int size= a.length;
+    	int size= a.length;
 
         double max = 0;
         for (int i = 1; i < size; i++) {
             if(a[i]>max){
-                max = a[i];
+            	max = a[i];
             }
-
+            
         }
 
         return max;
     }
-    //
-    // get the min of array
+//
+ // get the min of array
     public double getMin(double[] a) {
         //
-        int size= a.length;
+    	int size= a.length;
 
         double min = 500000;
         for (int i = 1; i < size; i++) {
             if(a[i]<min){
-                min = a[i];
+            	min = a[i];
             }
-
+            
         }
 
         return min;
     }
+    
+    //update 4 features 19/7/2022
+    
+    public double GetAvaLamdaOren() {
+		 ArrayList<Double> arr_namda = new ArrayList<Double>();
+		 	for (int i = 0; i<x.length;i++) {
+		 		 double namda = Math.atan(-x[i]/z[i]);
+		 		 arr_namda.add(namda);
+		 	}
+			return Avarage(arr_namda);
+	 }
+	 
+	 public  double GetVarLamdaOren() {
+		 ArrayList<Double> arr_namda = new ArrayList<Double>();
+		 	for (int i = 0; i<x.length;i++) {
+		 		 double namda = Math.atan(-x[i]/z[i]);
+		 		 arr_namda.add(namda);
+		 	}
+			return Variance(arr_namda);
+	 }
+		
+		
+	 public  double GetAvaPhiOren() {
+		    ArrayList<Double> arr_phi = new ArrayList<Double>();
+		 	for (int i = 0; i<x.length;i++) {
+		 		double phiAngle = Math.atan(y[i]/(Math.sqrt(Math.pow(x[i], 2)+ Math.pow(z[i], 2))));
+		 		arr_phi.add(phiAngle);
+		 	}
+			return Avarage(arr_phi);
+	 }
+	 
+	 public  double GetVarPhiOren() {
+		    ArrayList<Double> arr_phi = new ArrayList<Double>();
+		 	for (int i = 0; i< x.length; i++) {
+		 		double phiAngle = Math.atan(y[i]/(Math.sqrt(Math.pow(x[i], 2)+ Math.pow(z[i], 2))));
+		 		arr_phi.add(phiAngle);
+		 	
+		 	}
+			return Variance(arr_phi);
+	 }
+	 
+	 public  double Avarage(ArrayList<Double> arr) {
+		 double s = 0;
+		 for (int i = 0; i < arr.size(); i++) {
+			 s = s + arr.get(i);
+		 }
+		 return s/(arr.size());
+	 }
+	 
+	 public  double Variance(ArrayList<Double> arr) {
+		 double ava =  Avarage(arr);
+	
+		 double s = 0;
+		 for (int i = 0; i < arr.size(); i++) {
+			 s = s + Math.pow((arr.get(i)-ava),2.0);	
+		 };
+		 
+		 return s/(arr.size());
+	 }
+	 
+	 
+	 
+	 
+	 // bo sung feature wavelet 
+	 public double GetMavWaveletXLevelOneA () {
+		 double[] output = discreteHaarWaveletTransform(x, 1);
+		 double s = 0;
+		 for (int i = 0; i < output.length/2 ; i++) {
+			 s = s + Math.abs(output[i]);
+		 }
+		 return s/(output.length/2);
+	 }
+	 
+	 public double GetMavWaveletXLevelOneD () {
+		 double[] output = discreteHaarWaveletTransform(x, 1);
+		 double s = 0;
+		 for (int i = output.length/2; i < output.length ; i++) {
+			 s = s + Math.abs(output[i]);
+		 }
+		 return s/(output.length/2);
+	 }
+	 
+	 
+	 public double GetAvpWaveletXLevelOneA() {
+		 double[] output = discreteHaarWaveletTransform(x, 1);
+		 double s = 0;
+		 for (int i = 0; i < output.length/2 ; i++) {
+			 s = s + Math.pow(output[i],2);
+		 }
+		 return s/(output.length/2);
+	 }
+	 
+	 public double GetAvpWaveletXLevelOneD () {
+		 double[] output = discreteHaarWaveletTransform(x, 1);
+		 double s = 0;
+		 for (int i =  output.length/2; i <  output.length ; i++) {
+			 s = s + Math.pow(output[i],2);
+		 }
+		 //System.out.println("Hello" + s/(output.length/2));
+		 return s/(output.length/2);
+	 }
+	 
+	 
+	 public double GetSkWaveletXLevelOneA () {
+		 double[] output = discreteHaarWaveletTransform(x, 1);
+		 double s = 0;
+		 double rs = 0;
+		 double std = 0;
+		 double t = 0; 
+		 for (int i = 0; i < output.length/2 ; i++) {
+			 s = s + output[i];
+		 }		 
+		 //trung binh
+		 double tb = s/(output.length/2);
+		 for (int i = 0; i < output.length/2 ; i++) { 
+			 rs = rs + (Math.pow((output[i] - tb),3));
+		 }
+		 for (int i = 0; i < output.length/2 ; i++) { 
+			  t = t + Math.pow(output[i]-tb,2);
+		 }
+		 //do lech chuan
+		 std = Math.sqrt(t/(output.length/2 -1));			 
+		 return rs/((output.length/2)*Math.pow(std,3));
+	 }
+	 
+	 
+	 public double GetSkWaveletXLevelOneD () {
+		 double[] output = discreteHaarWaveletTransform(x, 1);
+		 double s = 0;
+		 double rs = 0;
+		 double std = 0;
+		 double t = 0;	 
+		 for (int i = output.length/2; i < output.length ; i++) {
+			 s = s + output[i];
+		 }		 
+		 //trung binh
+		 
+		 double tb = s/(output.length/2);
+		// System.out.println(tb);
+		 for (int i = output.length/2; i < output.length ; i++) { 
+			 rs = rs + (Math.pow((output[i] - tb),3));
+		 }
+		 for (int i = output.length/2; i < output.length ; i++) { 
+			  t = t + Math.pow(output[i]-tb,2);
+		 }
+		 //do lech chuan
+		 std = Math.sqrt(t/(output.length/2 -1));		 
+		 return rs/((output.length/2)*Math.pow(std,3));
+	 }
+	 
+	 
+	 
+	 
+	 //for y
+	 
+	 public double GetMavWaveletYLevelOneA () {
+		 double[] output = discreteHaarWaveletTransform(y, 1);
+		 double s = 0;
+		 for (int i = 0; i < output.length/2 ; i++) {
+			 s = s + Math.abs(output[i]);
+		 }
+		 return s/(output.length/2);
+	 }
+	 
+	 public double GetMavWaveletYLevelOneD () {
+		 double[] output = discreteHaarWaveletTransform(y, 1);
+		 double s = 0;
+		 for (int i = output.length/2; i < output.length ; i++) {
+			 s = s + Math.abs(output[i]);
+		 }
+		 return s/(output.length/2);
+	 }
+	 
+	 
+	 public double GetAvpWaveletYLevelOneA() {
+		 double[] output = discreteHaarWaveletTransform(y, 1);
+		 double s = 0;
+		 for (int i = 0; i < output.length/2 ; i++) {
+			 s = s + Math.pow(output[i],2);
+		 }
+		 return s/(output.length/2);
+	 }
+	 
+	 public double GetAvpWaveletYLevelOneD () {
+		 double[] output = discreteHaarWaveletTransform(y, 1);
+		 double s = 0;
+		 for (int i =  output.length/2; i <  output.length ; i++) {
+			 s = s + Math.pow(output[i],2);
+		 }
+		 //System.out.println("Hello" + s/(output.length/2));
+		 return s/(output.length/2);
+	 }
+	 
+	 
+	 public double GetSkWaveletYLevelOneA () {
+		 double[] output = discreteHaarWaveletTransform(y, 1);
+		 double s = 0;
+		 double rs = 0;
+		 double std = 0;
+		 double t = 0; 
+		 for (int i = 0; i < output.length/2 ; i++) {
+			 s = s + output[i];
+		 }		 
+		 //trung binh
+		 double tb = s/(output.length/2);
+		 for (int i = 0; i < output.length/2 ; i++) { 
+			 rs = rs + (Math.pow((output[i] - tb),3));
+		 }
+		 for (int i = 0; i < output.length/2 ; i++) { 
+			  t = t + Math.pow(output[i]-tb,2);
+		 }
+		 //do lech chuan
+		 std = Math.sqrt(t/(output.length/2 -1));			 
+		 return rs/((output.length/2)*Math.pow(std,3));
+	 }
+	 
+	 
+	 public double GetSkWaveletYLevelOneD () {
+		 double[] output = discreteHaarWaveletTransform(y, 1);
+		 double s = 0;
+		 double rs = 0;
+		 double std = 0;
+		 double t = 0; 
+		 for (int i = 0; i < output.length/2 ; i++) {
+			 s = s + output[i];
+		 }		 
+		 //trung binh
+		 double tb = s/(output.length/2);
+		 for (int i = 0; i < output.length/2 ; i++) { 
+			 rs = rs + (Math.pow((output[i] - tb),3));
+		 }
+		 for (int i = 0; i < output.length/2 ; i++) { 
+			  t = t + Math.pow(output[i]-tb,2);
+		 }
+		 //do lech chuan
+		 std = Math.sqrt(t/(output.length/2 -1));			 
+		 return rs/((output.length/2)*Math.pow(std,3));
+	 }
+	 
+	 
+	//for z
+	 
+		 public double GetMavWaveletZLevelOneA () {
+			 double[] output = discreteHaarWaveletTransform(z, 1);
+			 double s = 0;
+			 for (int i = 0; i < output.length/2 ; i++) {
+				 s = s + Math.abs(output[i]);
+			 }
+			 return s/(output.length/2);
+		 }
+		 
+		 public double GetMavWaveletZLevelOneD () {
+			 double[] output = discreteHaarWaveletTransform(z, 1);
+			 double s = 0;
+			 for (int i = output.length/2; i < output.length ; i++) {
+				 s = s + Math.abs(output[i]);
+			 }
+			 return s/(output.length/2);
+		 }
+		 
+		 
+		 public double GetAvpWaveletZLevelOneA() {
+			 double[] output = discreteHaarWaveletTransform(z, 1);
+			 double s = 0;
+			 for (int i = 0; i < output.length/2 ; i++) {
+				 s = s + Math.pow(output[i],2);
+			 }
+			 return s/(output.length/2);
+		 }
+		 
+		 public double GetAvpWaveletZLevelOneD () {
+			 double[] output = discreteHaarWaveletTransform(z, 1);
+			 double s = 0;
+			 for (int i =  output.length/2; i <  output.length ; i++) {
+				 s = s + Math.pow(output[i],2);
+			 }
+			 //System.out.println("Hello" + s/(output.length/2));
+			 return s/(output.length/2);
+		 }
+		 
+		 
+		 public double GetSkWaveletZLevelOneA () {
+			 double[] output = discreteHaarWaveletTransform(z, 1);
+			 double s = 0;
+			 double rs = 0;
+			 double std = 0;
+			 double t = 0; 
+			 for (int i = 0; i < output.length/2 ; i++) {
+				 s = s + output[i];
+			 }		 
+			 //trung binh
+			 double tb = s/(output.length/2);
+			 for (int i = 0; i < output.length/2 ; i++) { 
+				 rs = rs + (Math.pow((output[i] - tb),3));
+			 }
+			 for (int i = 0; i < output.length/2 ; i++) { 
+				  t = t + Math.pow(output[i]-tb,2);
+			 }
+			 //do lech chuan
+			 std = Math.sqrt(t/(output.length/2 -1));			 
+			 return rs/((output.length/2)*Math.pow(std,3));
+		 }
+		 
+		 
+		 public double GetSkWaveletZLevelOneD () {
+			 double[] output = discreteHaarWaveletTransform(z, 1);
+			 double s = 0;
+			 double rs = 0;
+			 double std = 0;
+			 double t = 0; 
+			 for (int i = 0; i < output.length/2 ; i++) {
+				 s = s + output[i];
+			 }		 
+			 //trung binh
+			 double tb = s/(output.length/2);
+			 for (int i = 0; i < output.length/2 ; i++) { 
+				 rs = rs + (Math.pow((output[i] - tb),3));
+			 }
+			 for (int i = 0; i < output.length/2 ; i++) { 
+				  t = t + Math.pow(output[i]-tb,2);
+			 }
+			 //do lech chuan
+			 std = Math.sqrt(t/(output.length/2 -1));			 
+			 return rs/((output.length/2)*Math.pow(std,3));
+		 }
+		 
+	 
+	 
+	 
+
+	 public static double[] discreteHaarWaveletTransform(double[] input, int level) {
+		    // This function assumes that input.length=2^n, n>1
+		 double[] output = new double[input.length];
+		    int count = 0;	
+		    for (int length = input.length / 2; count <= level ; length = length / 2) {
+		        // length is the current length of the working area of the output array.
+		        // length starts at half of the array size and every iteration is halved until it is 1.
+		        for (int i = 0; i < length; ++i) {
+		        	double sum = input[i * 2] + input[i * 2 + 1];
+		        	double difference = input[i * 2] - input[i * 2 + 1];
+		            output[i] = sum;
+		            output[length + i] = difference;
+		        }
+		        if (length == 1) {
+		            return output;
+		        }
+		        count++;
+
+		        //Swap arrays to do next iteration
+		        System.arraycopy(output, 0, input, 0, length);
+		    }
+		    return output;
+	 }
 
 
 }

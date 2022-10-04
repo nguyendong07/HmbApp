@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
 import android.graphics.Color;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -16,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -70,16 +74,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static String result_sub1_string;
     private static String final_result;
     private float[] acc_3 = new float[4];
-    private double TIME_SITE=1.35*4+0.01;
+    private double TIME_SITE=1.35;
+    private static double OVERLAP_SIZE=1.08;
     public static double WINDOW_TIME_SITE;
     private static int 	dataCount;
-    private int count = 0;
-    float ALPHA = 0.1f;
+    private static int count = 0;
     private static int size_w = 128;
-    private static double over_lap = 0.5;
-    private static int OVERLAP_SIZE=1;
+    private static double over_lap = 0.8;
+    private static final double ALPHA = 0.1d;
     private static int next_windows;
     private static float[] record = new float[4];
+    private static ArrayList<SimpleAccelData> rawAccelDatas =  new ArrayList<SimpleAccelData>();
     final Handler handler = new Handler();
     ArrayList<Double> XList = new ArrayList<Double>();
     ArrayList<Double> YList = new ArrayList<Double>();
@@ -87,15 +92,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     ArrayList<Double> TList = new ArrayList<Double>();
     FileOutputStream fos = null;
     ArrayList<Double> TestList = new ArrayList<Double>();
-
+    private static int turn = 0;
     ArrayList<Double> X = new ArrayList<Double>();
     ArrayList<Double> Y = new ArrayList<Double>();
     ArrayList<Double> Z = new ArrayList<Double>();
     ArrayList<Double> T = new ArrayList<Double>();
+    static double[] endSignal = new double[] { 0d, 0d, 0d };
 
-
+    static PowerFeatures powerFeatures = new PowerFeatures();
     ArrayList<Double> Features = new ArrayList<Double>();
-
+    Button button;
     ArrayList<Double> Feature_New = new ArrayList<Double>();
     ArrayList<double[]> RawData = new ArrayList<double[]>();
     ArrayList<AccelData> RawData_New = new ArrayList<AccelData>();
@@ -129,82 +135,62 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             AssetManager assetManager = getAssets();
             inputStream = assetManager.open(modelfile);
             classifier = (Classifier) SerializationHelper.read(inputStream);
-            System.out.println("Model" + classifier);
+            //System.out.println("Model" + classifier);
             inputStream.close();
         }
         catch (Exception e) {
             System.out.println("Error in rf predict" + e);
         }
         if (accelerometer != null) {
-            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+                sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
         }
+
+
+
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
         File directory = contextWrapper.getDir("result" , Context.MODE_PRIVATE);
-        myInternalFile = new File(directory,   "activity.txt");
-
-
-        try {
-            fos = new FileOutputStream(myInternalFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
 
         Button view_activity = (Button) findViewById(R.id.view_act);
         view_activity.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                view_activity.setText("Xem kết quả");
+                //button.setText("Thu dữ liệu");
                 ViewAct();
             }
         });
 
-        Button button = (Button) findViewById(R.id.button2);
+        button = (Button) findViewById(R.id.button2);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                ImageView rocketImage = (ImageView) findViewById(R.id.wave_animation);
+                rocketImage.setBackgroundResource(R.drawable.movie);
+
+                Drawable rocketAnimation = rocketImage.getBackground();
+
+                if (rocketAnimation instanceof Animatable) {
+                    ((Animatable)rocketAnimation).start();
+
+                }
+
+                myInternalFile = new File(directory,   "activity_" + turn + ".txt" );
+                try {
+                    fos = new FileOutputStream(myInternalFile);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
                 button.setText("Đang thu dữ liệu");
 //                RawData.clear();
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         started = true;
-//                        UpdateActivity task = new UpdateActivity();
-//                        task.execute();
                     }
-                }, 5000);
+                }, 2000);
+
             }
         });
         dataCount=1;
         WINDOW_TIME_SITE=TIME_SITE*1000;
-        mChart = (LineChart) findViewById(R.id.chart1);
-        mChart.getDescription().setEnabled(true);
-        mChart.getDescription().setText("Real Time Accelerometer");
-        mChart.setTouchEnabled(false);
-        mChart.setDragEnabled(false);
-        mChart.setScaleEnabled(false);
-        mChart.setDrawGridBackground(false);
-        mChart.setPinchZoom(false);
-        mChart.setBackgroundColor(Color.WHITE);
-        LineData data = new LineData();
-        data.setValueTextColor(Color.WHITE);
-        mChart.setData(data);
-        Legend l = mChart.getLegend();
-        l.setForm(Legend.LegendForm.LINE);
-        l.setTextColor(Color.WHITE);
-        XAxis xl = mChart.getXAxis();
-        xl.setTextColor(Color.WHITE);
-        xl.setDrawGridLines(true);
-        xl.setAvoidFirstLastClipping(true);
-        xl.setEnabled(true);
-        YAxis leftAxis = mChart.getAxisLeft();
-        leftAxis.setTextColor(Color.WHITE);
-        leftAxis.setDrawGridLines(false);
-        leftAxis.setAxisMaximum(40f);
-        leftAxis.setAxisMinimum(0f);
-        leftAxis.setDrawGridLines(true);
-        YAxis rightAxis = mChart.getAxisRight();
-        rightAxis.setEnabled(false);
-        mChart.getAxisLeft().setDrawGridLines(false);
-        mChart.getXAxis().setDrawGridLines(false);
-        mChart.setDrawBorders(false);
-        feedMultiple();
     }
 
     //AsyncTask xử lý đa luồng
@@ -219,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             for (int k = 8; k < 1000; k++){
                 ProcessAndPredictFix(k);
                 //k = k + 1;
-                System.out.println("" + k);
+               // System.out.println("" + k);
             }
             return null;
         }
@@ -242,18 +228,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             i = (int) (window_size * (1-ovevlap))*k;
             j = i + window_size;
         }
-        System.out.println("Giá trị đầu và cuối của array con là "+ i + " " + j);
+       // System.out.println("Giá trị đầu và cuối của array con là "+ i + " " + j);
         return CopyRangeFix(arr, i, j);
     }
 
     public void ViewAct() {
-//        started = false;
+
+
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
         StringBuilder sb = new StringBuilder();
         String [] information = new String [] {};
         try {
             File directory = contextWrapper.getDir("result" , Context.MODE_PRIVATE);
-            myInternalFile = new File(directory, "activity.txt");
+            myInternalFile = new File(directory, "activity_" + turn + ".txt");
             FileInputStream fis = new FileInputStream(myInternalFile);
             InputStreamReader isr = new InputStreamReader(fis);
             BufferedReader bufferedReader = new BufferedReader(isr);
@@ -266,16 +253,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         sb.append(line).append(" ");
                     }
                 }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
             information = sb.toString().split(" ");
             TextView ts = (TextView) findViewById(R.id.view_text_act);
             String act ="";
-            for (int m = 0; m < information.length;m++) {
+            for (int m = 0; m < information.length; m++) {
                 act += information[m] + " ";
+                if(m == information.length-1) {
+                    act += information[m] + " "+"end";
+                }
             }
             ts.setText(act);
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -287,26 +279,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (RawData != null && RawData.size() != 0) {
             arr_1 = SlidingWindow(RawData,128,0.85 ,k);
             arr_2 = SlidingWindow(RawData,128,0.85 ,k+1);
-            System.out.println("Độ dài array ban đầu" + RawData.size());
+           // System.out.println("Độ dài array ban đầu" + RawData.size());
 
             ArrayList<double []> TwoSubArray = new ArrayList<double []>();
             TwoSubArray.add(Array44Fearture(arr_1));
             TwoSubArray.add(Array44Fearture(arr_2));
 
-
             // Xử lý mảng và đưa ra kết quả double
 
-            //result_sub1 = predict44RF(TwoSubArray);
 
             result_sub1_string = ActionResult((int)result_sub1);
-
             // Chuyển kết quả sang string
-            /*result_sub1_string = ActionResult((int) result_sub1);
-            result_sub2_string = ActionResult((int) result_sub2);*/
-
             // Kết quả cuối cùng
             final_result = FinalResultOne(result_sub1_string);
-            System.out.println("Hành động đoán được là " + final_result);
+           // System.out.println("Hành động đoán được là " + final_result);
             return final_result;
         }
         else return "Chưa xác định";
@@ -319,11 +305,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         YList = SplitArrayList(arr, "Y");
         ZList = SplitArrayList(arr, "Z");
         TList = SplitArrayList(arr, "T");
-//        x = arrlist2arr(XList);
-//        y = arrlist2arr(YList);
-//        z = arrlist2arr(ZList);
-//        t = arrlist2arr(TList);
-//        Features = Get44Features(x,y,z,t);
         data = arrlist2arr1(Features);
         return data;
     }
@@ -374,7 +355,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // Hàm trích suất thuộc tính 44 thuộc tính
     public ArrayList<Double> Get44Features(double[] X, double[] Y, double[] Z, double[] T) {
         FeaturesStatistic fs = new FeaturesStatistic(X,Y,Z,3.0,T);
-        PowerFeatures pf = new PowerFeatures();
         ArrayList<Double> arr = new ArrayList<Double>();
         double ARA = fs.getWindownARA();
         double MeanX = fs.getMeanX();
@@ -410,19 +390,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         double varTheta = fs.getVarianceTheta();
         double igPhi = fs.getIgPhi();
         double igTheta = fs.getIgTheta();
-        double Energy = pf.getEnergy();
+        double Energy = powerFeatures.getEnergy();
         double xFFTEnergy = fs.getXFFTEnergy();
         double yFFTEnergy = fs.getYFFTEnergy();
         double zFFTEnergy = fs.getZFFTEnergy();
         double xFFTEntropy = fs.getXFFTEntropy();
         double yFFTEntropy = fs.getYFFTEntropy();
         double zFFTEntropy = fs.getZFFTEntropy();
-        double Activity = fs.getACTIVITY("");
-        double Complexity = fs.getCOMPLEXITY("");
-        double Mobility = fs.getMOBILITY("");
-
+        double Activity = powerFeatures.getActivity();
+        double Complexity = powerFeatures.getComplexity();
+        double Mobility = powerFeatures.getMobility();
         arr.add(ARA);
-        //System.out.println("Ara" + ARA);
         arr.add(MeanX);
         arr.add(MeanY);
         arr.add(MeanZ);
@@ -469,6 +447,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         return arr;
     }
 
+    public static int Count(){
+        int i = 0;
+        int j = 128;
+        int n = 128;
+        double override = 0.8;
+        int length = 512;
+        int count = 1;
+        while (j < length){
+            i = (int)(1-override)*n*count;
+            j = i + n;
+            count = count + 1;
+
+        }
+        return count;
+    }
 
     public ArrayList<Double> CreateTestData(double [] arr) {
         ArrayList<Double> new_arr = new ArrayList<Double>();
@@ -563,66 +556,66 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         testing_data.setClassIndex(testing_data.numAttributes() - 1);
         Instance newInst = testing_data.instance(0);
         testing_data.delete();
-//        System.out.println("kiemtra134" + newInst.toString());
         try {
             result_predict = (int) classifier.classifyInstance(newInst);
-            // System.out.println("Ket qua day" + result_predict);
+
             total.add(result_predict);
         } catch (Exception e) {
             System.out.println("lỗi này" + e.toString());
         }
+        return result_predict;
 
 
 
-        if(total.get(0) == 0) {
-            return 0;
-        }
-        else if (total.get(0) == 1) {
-            return 1;
-        }
-        else if (total.get(0) == 2) {
-            return 2;
-        }
-        else if (total.get(0) == 3) {
-            return 3;
-        }
-        else if (total.get(0) == 4) {
-            return 4;
-        }
-        else if (total.get(0) == 5) {
-            return 5;
-        }
-        else if (total.get(0) == 6) {
-            return 6;
-        }
-        else if (total.get(0) == 7) {
-            return 7;
-        }
-        else if (total.get(0) == 8 ) {
-            return 8;
-        }
-        else if (total.get(0) == 9 ) {
-            return 9;
-        }
-        else if (total.get(0) == 10) {
-            return 10;
-        }
-        else if (total.get(0) == 11) {
-            return 11;
-        }
-        else if (total.get(0) == 12) {
-            return 12;
-        }
-        else if (total.get(0) == 13) {
-            return 13;
-        }
-        else if (total.get(0) == 14) {
-            return 14;
-        }
-        else if (total.get(0) == 15) {
-            return 15;
-        }
-        else return -1;
+//        if(total.get(0) == 0) {
+//            return 0;
+//        }
+//        else if (total.get(0) == 1) {
+//            return 1;
+//        }
+//        else if (total.get(0) == 2) {
+//            return 2;
+//        }
+//        else if (total.get(0) == 3) {
+//            return 3;
+//        }
+//        else if (total.get(0) == 4) {
+//            return 4;
+//        }
+//        else if (total.get(0) == 5) {
+//            return 5;
+//        }
+//        else if (total.get(0) == 6) {
+//            return 6;
+//        }
+//        else if (total.get(0) == 7) {
+//            return 7;
+//        }
+//        else if (total.get(0) == 8 ) {
+//            return 8;
+//        }
+//        else if (total.get(0) == 9 ) {
+//            return 9;
+//        }
+//        else if (total.get(0) == 10) {
+//            return 10;
+//        }
+//        else if (total.get(0) == 11) {
+//            return 11;
+//        }
+//        else if (total.get(0) == 12) {
+//            return 12;
+//        }
+//        else if (total.get(0) == 13) {
+//            return 13;
+//        }
+//        else if (total.get(0) == 14) {
+//            return 14;
+//        }
+//        else if (total.get(0) == 15) {
+//            return 15;
+//        }
+//        else return -1;
     }
 
 
@@ -650,48 +643,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager.unregisterListener(this);
 
     }
-    private void addEntry(SensorEvent event) {
 
-        LineData data = mChart.getData();
 
-        if (data != null) {
-
-            ILineDataSet set = data.getDataSetByIndex(0);
-            // set.addEntry(...); // can be called as well
-
-            if (set == null) {
-                set = createSet();
-                data.addDataSet(set);
-            }
-            data.addEntry(new Entry(set.getEntryCount(), event.values[0] + 5), 0);
-            data.notifyDataChanged();
-
-            // let the chart know it's data has changed
-            mChart.notifyDataSetChanged();
-
-            // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(150);
-            // mChart.setVisibleYRange(30, AxisDependency.LEFT);
-
-            // move to the latest entry
-            mChart.moveViewToX(data.getEntryCount());
-
-        }
-    }
-
-//    public static double[] CopyArr( double []x , int k, int count){
-//        return Arrays.copyOf(x, k, )
-//    }
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        if(plotData){
-            addEntry(sensorEvent);
-            plotData = false;
-        }
-//        + (sensorEvent.timestamp - System.nanoTime()));
         if (started) {
-
-            TestList.add((double)sensorEvent.values[0]);
+//            TestList.add((double)sensorEvent.values[0]);
             if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 acc_3 = lowPass(sensorEvent.values.clone(), acc_3);
             }
@@ -704,126 +661,180 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 RawData_New.add(accel);
                 dataCount++;
             }
-            count++;
+//            if (timeInMillis - RawData_New.get(0).getTimestamp() >= WINDOW_TIME_SITE)
 
-            if (timeInMillis - RawData_New.get(0).getTimestamp() >= WINDOW_TIME_SITE) {
-                double [] x = new double[0];
-                double [] y = new double[0];
-                double [] z = new double[0];
-                double [] t = new double[0];
+            if (RawData_New.size()==128) {
+               System.out.println(RawData_New.size());
 
-                // xử lý luồng dữ liệu thô
-//                if (RawData_New.size()%size_w>100) {
-//                    RawData_New.add(RawData_New.get(RawData_New.size()));
-//                }
-//                else if (RawData_New.size()%size_w < 2) {
-//                    RawData_New.remove(RawData_New.get(RawData_New.size()));
-//                }
 
-                System.out.println("Size cua rawdata" + RawData_New.size());
+              // System.out.println("Size cua rawdata" + RawData_New.size());
                 for (int k = 0; k < RawData_New.size() ; k++) {
                     X.add(RawData_New.get(k).getX());
                     Y.add(RawData_New.get(k).getY());
                     Z.add(RawData_New.get(k).getZ());
                     T.add((double)RawData_New.get(k).getTimestamp());
-                }
-                System.out.println("arr_x" + X.size());
-                double f = RawData_New.size()/(size_w*over_lap);
-
-                x = arrlist2arr(X);
-                System.out.println("arr_x" + X.size());
-                y = arrlist2arr(Y);
-                z = arrlist2arr(Z);
-                t = arrlist2arr(T);
-
-
-                X.clear();
-                Y.clear();
-                Z.clear();
-                T.clear();
-
-                int [] total = new int [] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-                for (int j = 0; j < 7 ; j++) {
-
-                    if (j == 0) {
-                        arr_x = Arrays.copyOfRange(x,0,size_w);
-                        arr_y = Arrays.copyOfRange(y,0,size_w);
-                        arr_z = Arrays.copyOfRange(z,0,size_w);
-                        arr_t = Arrays.copyOfRange(t,0,size_w);
-
-                    }
-                    else if(j > 0) {
-//                        System.out.println("j" + j);
-
-                        arr_x = Arrays.copyOfRange(x, (int)(j * size_w * (1 - over_lap)),  (int)(j * size_w * (1 - over_lap) + size_w));
-                        arr_y = Arrays.copyOfRange(y, (int)(j * size_w * (1 - over_lap)),  (int)(j * size_w * (1 - over_lap) + size_w));
-                        arr_z = Arrays.copyOfRange(z, (int)(j * size_w * (1 - over_lap)),  (int)(j * size_w * (1 - over_lap) + size_w));
-                        arr_t = Arrays.copyOfRange(t, (int)(j * size_w * (1 - over_lap)),  (int)(j * size_w * (1 - over_lap) + size_w));
-                    }
-                    Feature_New = Get44Features(arr_x,arr_y,arr_z,arr_t);
-                    //System.out.println("kiem tra" + Feature_New.size());
-                    data = arrlist2arr1(Feature_New);
-                    result_sub1 = predict44RF(data);
-                    try {
-                        String lineSeparator = System.getProperty("line.separator");
-                        //Mở file
-
-                        fos.write(ActionResult((int)result_sub1).getBytes(StandardCharsets.UTF_8));
-                        fos.write(lineSeparator.getBytes());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    switch((int)result_sub1){
-                        case 0 : total[0] +=1;
-                        case 1 : total[1] +=1;
-                        case 2 : total[2] +=1;
-                        case 3 : total[3] +=1;
-                        case 4 : total[4] +=1;
-                        case 5 : total[5] +=1;
-                        case 6 : total[6] +=1;
-                        case 7 : total[7] +=1;
-                        case 8 : total[8] +=1;
-                        case 9 : total[9] +=1;
-                        case 10 : total[10] +=1;
-                        case 11 : total[11] +=1;
-                        case 12 : total[12] +=1;
-                        case 13 : total[13] +=1;
-                        case 14 : total[14] +=1;
-                    }
-//                    System.out.println("kiem tra" + data[1]);
-//                    System.out.println("kiem tra" + result_sub1);
-                }
-                int max = total[0];
-                int index = 0;
-                for (int l = 0; l < total.length; l ++) {
-                    if (total[l] > max) {
-                        max = total[l];
-                        index = l;
-                    }
+                    rawAccelDatas.add(new SimpleAccelData(RawData_New.get(k).getTimestamp(),RawData_New.get(k).getX(),RawData_New.get(k).getY(),RawData_New.get(k).getZ()));
                 }
 
-                result_sub1_string = ActionResult(index);
-                final_result = FinalResultOne(result_sub1_string);
-                TextView text = (TextView) findViewById(R.id.result);
-                text.setText(final_result);
-                //System.out.println("Hành động đoán được là " + final_result);
-                ArrayList<AccelData>  Luu_AccelSensor = new ArrayList<AccelData>();
-                next_windows = (int) ((TIME_SITE-OVERLAP_SIZE)*dataCount/TIME_SITE);
-                for(int i =next_windows; i<dataCount-1; i++)
-                {
-                    Luu_AccelSensor.add(RawData_New.get(i));
-                }
-                RawData_New = new ArrayList<AccelData>();
-                //System.out.println("new size" + RawData_New.size());
-                for(int j =0; j<Luu_AccelSensor.size(); j++) {
-                    RawData_New.add(Luu_AccelSensor.get(j));
-                }
-                //System.out.println("X mới" + RawData_New.get(0).getX());
-                //System.out.printf("Size: " + dataCount + "-" + RawData_New.size() + "/" + next_windows + "\n");
-                dataCount = RawData_New.size();
+                Thread th1 = new Thread() {
+                    @Override
+                    public void run() {
+                        double[] x = new double[0];
+                        double[] y = new double[0];
+                        double[] z = new double[0];
+                        double[] t = new double[0];
+                        x = arrlist2arr(X);
+                        y = arrlist2arr(Y);
+                        z = arrlist2arr(Z);
+                        t = arrlist2arr(T);
+                        X.clear();
+                        Y.clear();
+                        Z.clear();
+                        T.clear();
+//                int [] total = new int [] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                        arr_x = Arrays.copyOfRange(x, 0, size_w);
+                        arr_y = Arrays.copyOfRange(y, 0, size_w);
+                        arr_z = Arrays.copyOfRange(z, 0, size_w);
+                        arr_t = Arrays.copyOfRange(t, 0, size_w);
+                        for (int j = 0; j < 1; j++) {
+                            if (j == 0) {
+                                arr_x = Arrays.copyOfRange(x, 0, size_w);
+                                arr_y = Arrays.copyOfRange(y, 0, size_w);
+                                arr_z = Arrays.copyOfRange(z, 0, size_w);
+                                arr_t = Arrays.copyOfRange(t, 0, size_w);
+                            } else if (j > 0) {
+                                arr_x = Arrays.copyOfRange(x, (int) (j * size_w * (1 - over_lap)), (int) (j * size_w * (1 - over_lap) + size_w));
+                                arr_y = Arrays.copyOfRange(y, (int) (j * size_w * (1 - over_lap)), (int) (j * size_w * (1 - over_lap) + size_w));
+                                arr_z = Arrays.copyOfRange(z, (int) (j * size_w * (1 - over_lap)), (int) (j * size_w * (1 - over_lap) + size_w));
+                                arr_t = Arrays.copyOfRange(t, (int) (j * size_w * (1 - over_lap)), (int) (j * size_w * (1 - over_lap) + size_w));
+                            }
+                    System.out.println("do dai"  + arr_x.length);
+                    for (int m = 0 ; m <arr_x.length ; m++) {
+                        System.out.print(arr_x[m] + " ");
+
+                    }
+                    System.out.print("end");
+
+                            arr_x = filter(arr_x);
+                            arr_y = filter(arr_y);
+                            arr_z = filter(arr_z);
+
+
+                            arr_x = lowFilter(arr_x, j, endSignal[0]);
+                            arr_y = lowFilter(arr_y, j, endSignal[1]);
+                            arr_z = lowFilter(arr_z, j, endSignal[2]);
+
+                            if (j < 16 - 2) {
+                                endSignal[0] = arr_x[0];
+                                endSignal[1] = arr_y[0];
+                                endSignal[2] = arr_z[0];
+                            }
+                            ArrayList<SimpleAccelData> windowData;
+
+                            windowData = getRawDataWindown(rawAccelDatas, (int) (j * 128 * (1 - 0.8)), 128);
+                            powerFeatures.setAcc(windowData);
+                            powerFeatures.analysisRMS();
+
+
+                            Feature_New = Get44Features(arr_x, arr_y, arr_z, arr_t);
+
+                            // double[] train_wal ={476.7147436,97.31104498,454.506224,-47.15882139,504.6584476,6824.107517,18450.7015,3661.737322,322.4910043,646.9965053,184.7021588,82.60815648,135.8333593,60.51229067,2100.988289,-2481.726962,2771.176234,0.5,0,2,2.578127255,1.445068485,-0.903982518,-1.03E+12,-7.94E+12,-8.99E+11,-9.87E+12,23.06162645,0.777305005,0.779379269,2.437232391,10.74190913,3.63E-06,1.30E-04,16.00770154,1187.74859,55811.2652,753.3248983,0.280929128,-1.573327224,-0.9932935,-3.249107644,1.007160108,1.007999668};
+                            data = arrlist2arr1(Feature_New);
+
+//                    System.out.println(data.length);
+//
+//                    for (int ta = 0; ta < data.length; ta++) {
+//                        System.out.print(data[ta] + " ");
+//                    }
+
+                            // double dif = DisWithTraining(train_wal, data);
+
+                            result_sub1 = predict44RF(data);
+                            result_sub1_string = ActionResult((int) result_sub1);
+                            final_result = FinalResultOne(result_sub1_string);
+                            TextView text = findViewById(R.id.result);
+                            text.setText(final_result);
+                            try {
+                                String lineSeparator = System.getProperty("line.separator");
+
+                                fos.write(ActionResult((int) result_sub1).getBytes(StandardCharsets.UTF_8));
+                                fos.write(lineSeparator.getBytes());
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    }
+
+                    ;
+
+
+//                    switch((int)result_sub1){
+//                        case 0 : total[0] +=1;
+//                        case 1 : total[1] +=1;
+//                        case 2 : total[2] +=1;
+//                        case 3 : total[3] +=1;
+//                        case 4 : total[4] +=1;
+//                        case 5 : total[5] +=1;
+//                        case 6 : total[6] +=1;
+//                        case 7 : total[7] +=1;
+//                        case 8 : total[8] +=1;
+//                        case 9 : total[9] +=1;
+//                        case 10 : total[10] +=1;
+//                        case 11 : total[11] +=1;
+//                        case 12 : total[12] +=1;
+//                        case 13 : total[13] +=1;
+//                        case 14 : total[14] +=1;
+//                    }
+
+                };
+//                int max = total[0];
+//                int index = 0;
+//                for (int l = 0; l < total.length; l ++) {
+//                    if (total[l] > max) {
+//                        max = total[l];
+//                        index = l;
+//                    }
+//                }
+
+
+                Thread th2 = new Thread(){
+                    @Override
+                    public void run() {
+                        ArrayList<AccelData>  Luu_AccelSensor = new ArrayList<AccelData>();
+                        next_windows = (int) ((TIME_SITE-OVERLAP_SIZE)*dataCount/TIME_SITE);
+//                        System.out.println("điemau"+ next_windows);
+//                        System.out.println("diemcuoi" + dataCount);
+                        for(int i =next_windows; i<dataCount-1; i++)
+                        {
+
+                            Luu_AccelSensor.add(RawData_New.get(i));
+                        }
+                        RawData_New = new ArrayList<AccelData>();
+                        for(int j =0; j<Luu_AccelSensor.size(); j++) {
+                            RawData_New.add(Luu_AccelSensor.get(j));
+
+                        }
+                        dataCount = RawData_New.size();
+                        //System.out.println("size cua array x" + RawData_New.size());
+                    }
+                };
+
+                th1.start();
+                th2.start();
+
             }
             acc_3 = null;
         }
+    }
+    public static double DisWithTraining(double [] arr1, double [] arr2){
+        double s = 0;
+        for (int  k = 0 ; k < arr1.length; k++) {
+            s = s + Math.pow((arr1[k] - arr2[k]),2);
+        }
+        s = Math.sqrt(s)/arr1.length;
+        return s;
     }
 
     protected float[] lowPass(float[] input, float[] output) {
@@ -839,7 +850,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onResume() {
         super.onResume();
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     @Override
@@ -1026,5 +1037,63 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             case 14 : return "WAL";
             default : return "No activty predicted";
         }
+    }
+
+    private static ArrayList<SimpleAccelData> getRawDataWindown(ArrayList<SimpleAccelData> rawAccelDatas, int begin,
+                                                                int windownLenght) {
+        ArrayList<SimpleAccelData> datas = new ArrayList<>();
+        for (int i = 0; i < windownLenght; i++) {
+            datas.add(rawAccelDatas.get(begin + i));
+        }
+        return datas;
+    }
+
+
+
+    private static double[] filter(double[] arms) {
+        // TODO Auto-generated method stub
+
+        double a1, a2, b0, b1, b2 = 0;
+        b1 = 1;
+        b0 = 0;
+        b2 = 1;
+        a1 = -1.56f;
+        a2 = 0.6f;
+        int len = arms.length;
+        double[] rs = new double[len];
+
+        if (len > 2) {
+            rs[0] = arms[0];
+
+            rs[1] = arms[1];
+        }
+
+        for (int i = 2; i < len; i++) {
+            double ar = 0;
+            ar = b0 * arms[i] + b1 * arms[i - 1] + b2 * arms[i - 2] - a1 * rs[i - 1] - a2 * rs[i - 2];
+            rs[i] = ar;
+        }
+
+        return rs;
+    }
+
+
+    private static double[] lowFilter(double[] windownX, int index, double endSignal) {
+        int length = windownX.length;
+        double[] windown = new double[length];
+        if (index == 0) {
+            windown[0] = windownX[0];
+        } else {
+            windown[0] = endSignal;
+        }
+
+        for (int i = 1; i < length; i++) {
+            windown[i] = lowFilters(windownX[i - 1], windownX[i]);
+        }
+        return windown;
+    }
+
+    private static double lowFilters(double signalOutput, double signalInput) {// loc thong thap, 2.3
+        return signalOutput + ALPHA * (signalInput - signalOutput);
     }
 }

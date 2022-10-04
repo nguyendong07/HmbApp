@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="30sp"
+    android:background="@drawable/test"
     android:textAlignment="center"
     tools:context=".MainActivity">
 
@@ -31,20 +32,35 @@
     <!--        app:layout_constraintTop_toTopOf="parent" />-->
 
 
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/chart1"
-        android:layout_width="400dp"
+<!--    <com.github.mikephil.charting.charts.LineChart-->
+<!--        android:id="@+id/chart1"-->
+<!--        android:layout_width="336dp"-->
+<!--        android:layout_height="116dp">-->
+
+<!--    </com.github.mikephil.charting.charts.LineChart>-->
+    <ImageView
+        android:layout_width="match_parent"
+        android:id="@+id/wave_animation"
         android:layout_height="116dp">
 
-    </com.github.mikephil.charting.charts.LineChart>
+    </ImageView>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button2"
-        android:layout_width="388dp"
+        android:layout_width="351dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
-        android:background="@color/teal_200"
-        android:text="Bắt đầu thu nhận dữ liệu"
+        android:height="62dp"
+        android:background="@drawable/button_style"
+        android:backgroundTint="#68BD1C"
+        android:bottomLeftRadius="10dp"
+        android:bottomRightRadius="10dp"
+        android:color="#ffffff"
+        android:text="Bắt đầu thu dữ liệu"
+        android:textColor="#FFFFFF"
+        android:topLeftRadius="10dp"
+        android:topRightRadius="10dp"
+        app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view" />
@@ -54,10 +70,9 @@
         android:layout_width="351dp"
         android:layout_height="49dp"
         android:layout_marginTop="10sp"
-        android:background="@drawable/abc_vector_test"
         android:text="Hành động đoán được"
         android:textAlignment="center"
-        android:textColor="#101010"
+        android:textColor="#F4F1F1"
         android:textSize="24sp"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -67,16 +82,28 @@
         android:layout_height="48dp"
         android:text="Đang đoán..."
         android:textAlignment="center"
-        android:textColor="#131313"
+        android:textColor="#F4F1F1"
         android:textSize="20sp" />
 
-    <Button
-        android:id="@+id/view_act"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20px"
-        android:background="#FFFFFF"
+    <androidx.appcompat.widget.AppCompatButton
 
+        android:id="@+id/view_act"
+
+        android:layout_width="351dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:height="62dp"
+        android:background="@drawable/button_style"
+        android:backgroundTint="#68BD1C"
+        android:bottomLeftRadius="10dp"
+        android:bottomRightRadius="10dp"
+        android:color="#ffffff"
+        android:textColor="#FFFFFF"
+        android:topLeftRadius="10dp"
+        android:topRightRadius="10dp"
+        app:cornerRadius="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         android:text="Xem kết quả" />
 
     <TextView
