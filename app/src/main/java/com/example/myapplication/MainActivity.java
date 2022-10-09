@@ -746,16 +746,49 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 }
                                 count_max = 1;
                                 switch(index) {
-
+                                    case 0:
+                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.bsc);
+                                        mediaPlayer.start();
+                                     case 1:
+                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.fol_fkl);
+                                        mediaPlayer.start();
+                                     case 2:
+                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.fol_fkl);
+                                        mediaPlayer.start();
+                                     case 3:
+                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.jog);
+                                        mediaPlayer.start();
+                                     case 4:
+                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.jum);
+                                        mediaPlayer.start();
+                                     case 5:
+                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sdl);
+                                        mediaPlayer.start();
+                                     case 6:
+                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sit);
+                                        mediaPlayer.start();
+                                     case 7:
+                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.std);
+                                        mediaPlayer.start();
+                                     case 8:
+                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.stn);
+                                        mediaPlayer.start();
+                                     case 9:
+                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.stu);
+                                        mediaPlayer.start();
+                                      case 10:
+                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wal);
+                                        mediaPlayer.start(); 
                                     default:
-                                        try {
-                                            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wal);
-                                            mediaPlayer.start();
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            System.out.println(e.getMessage().toString());
-                                        };
+                                       System.out.println("no error");
+                                        // try {
+                                        //     mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wal);
+                                        //     mediaPlayer.start();
+                                        // }
+                                        // catch (Exception e)
+                                        // {
+                                        //     System.out.println(e.getMessage().toString());
+                                        // };
                                 }
                             }
                             else switch ((int) result_sub1) {
