@@ -5,21 +5,17 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
 import android.graphics.Color;
-import android.graphics.drawable.Animatable;
-import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.AsyncTask;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -75,14 +71,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static String final_result;
     private float[] acc_3 = new float[4];
     private double TIME_SITE=1.35;
-    private static double OVERLAP_SIZE=1.08;
+    private static double OVERLAP_SIZE=1.35*75/100;
     public static double WINDOW_TIME_SITE;
     private static int 	dataCount;
-    private static int count = 0;
+    private static int count_max = 1;
     private static int size_w = 128;
     private static double over_lap = 0.8;
     private static final double ALPHA = 0.1d;
     private static int next_windows;
+    MediaPlayer mediaPlayer = new MediaPlayer();
 
     private static ArrayList<SimpleAccelData> rawAccelDatas =  new ArrayList<SimpleAccelData>();
     final Handler handler = new Handler();
@@ -122,7 +119,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         try {
+
             String modelfile="acc_3_0.8_model_11_MobiAct_44F_RF_Adroid3-6-6.model";
+            modelfile = "acc_4_0.75_model_11_MobiAct_44F_RF_Adroid3-6-6.model";
             InputStream inputStream = null;
             AssetManager assetManager = getAssets();
             inputStream = assetManager.open(modelfile);
@@ -151,12 +150,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         button = (Button) findViewById(R.id.button2);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                ImageView rocketImage = (ImageView) findViewById(R.id.wave_animation);
-                rocketImage.setBackgroundResource(R.drawable.movie);
-                Drawable rocketAnimation = rocketImage.getBackground();
-                if (rocketAnimation instanceof Animatable) {
-                    ((Animatable)rocketAnimation).start();
-                }
+//                ImageView rocketImage = (ImageView) findViewById(R.id.wave_animation);
+//                rocketImage.setBackgroundResource(R.drawable.movie);
+//                Drawable rocketAnimation = rocketImage.getBackground();
+//                if (rocketAnimation instanceof Animatable) {
+//                    ((Animatable)rocketAnimation).start();
+//                }
                 myInternalFile = new File(directory,   "activity_" + turn + ".txt" );
                 try {
                     fos = new FileOutputStream(myInternalFile);
@@ -175,6 +174,106 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
         dataCount=1;
         WINDOW_TIME_SITE=TIME_SITE*1000;
+
+
+
+        // chart
+
+        mChart = (LineChart) findViewById(R.id.chart1);
+        mChart.getDescription().setEnabled(true);
+
+        // enable touch gestures
+        mChart.setTouchEnabled(true);
+
+        // enable scaling and dragging
+        mChart.setDragEnabled(true);
+        mChart.setScaleEnabled(true);
+        mChart.setDrawGridBackground(false);
+
+        // if disabled, scaling can be done on x- and y-axis separately
+        mChart.setPinchZoom(true);
+
+        // set an alternative background color
+        mChart.setBackgroundColor(Color.WHITE);
+
+        LineData data = new LineData();
+        data.setValueTextColor(Color.WHITE);
+
+        // add empty data
+        mChart.setData(data);
+
+        // get the legend (only possible after setting data)
+        Legend l = mChart.getLegend();
+
+        // modify the legend ...
+        l.setForm(Legend.LegendForm.LINE);
+        l.setTextColor(Color.WHITE);
+
+        XAxis xl = mChart.getXAxis();
+        xl.setTextColor(Color.WHITE);
+        xl.setDrawGridLines(true);
+        xl.setAvoidFirstLastClipping(true);
+        xl.setEnabled(true);
+
+        YAxis leftAxis = mChart.getAxisLeft();
+        leftAxis.setTextColor(Color.WHITE);
+        leftAxis.setDrawGridLines(false);
+        leftAxis.setAxisMaximum(10f);
+        leftAxis.setAxisMinimum(0f);
+        leftAxis.setDrawGridLines(true);
+
+        YAxis rightAxis = mChart.getAxisRight();
+        rightAxis.setEnabled(false);
+
+        mChart.getAxisLeft().setDrawGridLines(false);
+        mChart.getXAxis().setDrawGridLines(false);
+        mChart.setDrawBorders(false);
+
+        feedMultiple();
+
+    }
+
+
+    private LineDataSet createSet() {
+        LineDataSet set = new LineDataSet(null, "Dynamic Data");
+        set.setAxisDependency(YAxis.AxisDependency.LEFT);
+        set.setLineWidth(2f);
+        set.setColor(Color.MAGENTA);
+        set.setHighlightEnabled(false);
+        set.setDrawValues(false);
+        set.setDrawCircles(false);
+        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        set.setCubicIntensity(0.2f);
+        return set;
+    }
+
+    private void addEntry(SensorEvent event) {
+
+        LineData data = mChart.getData();
+
+        if (data != null) {
+
+            ILineDataSet set = data.getDataSetByIndex(0);
+            // set.addEntry(...); // can be called as well
+
+            if (set == null) {
+                set = createSet();
+                data.addDataSet(set);
+            }
+            data.addEntry(new Entry(set.getEntryCount(), event.values[0] + 5), 0);
+            data.notifyDataChanged();
+
+            // let the chart know it's data has changed
+            mChart.notifyDataSetChanged();
+
+            // limit the number of visible entries
+            mChart.setVisibleXRangeMaximum(150);
+            // mChart.setVisibleYRange(30, AxisDependency.LEFT);
+
+            // move to the latest entry
+            mChart.moveViewToX(data.getEntryCount());
+
+        }
     }
 
     public void ViewAct() {
@@ -350,7 +449,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     //ArrayList<Double> features
     public double predict44RF(double [] features){
         FastVector classAttributeVector = new FastVector();
-        String[] classValues = {"BSC","CHU","CSI","CSO","FKL","FOL","JOG","JUM","LYI","SCH","SDL","SIT","STD","STN","STU","WAL"};
+        String[] classValues = {"BSC","FKL","FOL","JOG","JUM","SDL","SIT","STD","STN","STU","WAL"};
         classAttributeVector.addElement(classValues[0]);
         classAttributeVector.addElement(classValues[1]);
         classAttributeVector.addElement(classValues[2]);
@@ -362,11 +461,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         classAttributeVector.addElement(classValues[8]);
         classAttributeVector.addElement(classValues[9]);
         classAttributeVector.addElement(classValues[10]);
-        classAttributeVector.addElement(classValues[11]);
-        classAttributeVector.addElement(classValues[12]);
-        classAttributeVector.addElement(classValues[13]);
-        classAttributeVector.addElement(classValues[14]);
-        classAttributeVector.addElement(classValues[15]);
         FastVector atts = new FastVector();
         atts.addElement(new Attribute("ARA"));
         atts.addElement(new Attribute("MeanX"));
@@ -430,6 +524,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         testing_data.setClassIndex(testing_data.numAttributes() - 1);
         Instance newInst = testing_data.instance(0);
         testing_data.delete();
+        System.out.println("inst" + newInst);
         try {
             result_predict = (int) classifier.classifyInstance(newInst);
 
@@ -472,21 +567,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         else if (total.get(0) == 10) {
             return 10;
         }
-        else if (total.get(0) == 11) {
-            return 11;
-        }
-        else if (total.get(0) == 12) {
-            return 12;
-        }
-        else if (total.get(0) == 13) {
-            return 13;
-        }
-        else if (total.get(0) == 14) {
-            return 14;
-        }
-        else if (total.get(0) == 15) {
-            return 15;
-        }
         else return -1;
     }
 
@@ -505,9 +585,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
+
+
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
+        if(plotData){
+            addEntry(sensorEvent);
+            plotData = false;
+        }
         if (started) {
+            int [] total = new int [] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+            int [] total_11 = new int [] {0,0,0,0,0,0,0,0,0,0,0};
+
 //            TestList.add((double)sensorEvent.values[0]);
             if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 acc_3 = lowPass(sensorEvent.values.clone(), acc_3);
@@ -568,36 +657,134 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //                                arr_z = Arrays.copyOfRange(z, (int) (j * size_w * (1 - over_lap)), (int) (j * size_w * (1 - over_lap) + size_w));
 //                                arr_t = Arrays.copyOfRange(t, (int) (j * size_w * (1 - over_lap)), (int) (j * size_w * (1 - over_lap) + size_w));
 //                            }
-
                             arr_x = filter(x);
                             arr_y = filter(y);
                             arr_z = filter(z);
-
 
                             arr_x = lowFilter(arr_x, j, endSignal[0]);
                             arr_y = lowFilter(arr_y, j, endSignal[1]);
                             arr_z = lowFilter(arr_z, j, endSignal[2]);
 
-//                            if (j < 16 - 2) {
-//                                endSignal[0] = arr_x[0];
-//                                endSignal[1] = arr_y[0];
-//                                endSignal[2] = arr_z[0];
-//                            }
                             ArrayList<SimpleAccelData> windowData;
-
-                            windowData = getRawDataWindown(rawAccelDatas, (int) (j * 128 * (1 - 0.8)), 128);
+                            windowData = getRawDataWindown(rawAccelDatas, (int) (j * 128 * (1 - 0.75)), 128);
                             powerFeatures.setAcc(windowData);
                             powerFeatures.analysisRMS();
-
-
                             Feature_New = Get44Features(arr_x, arr_y, arr_z, arr_t);
-
                             // double[] train_wal ={476.7147436,97.31104498,454.506224,-47.15882139,504.6584476,6824.107517,18450.7015,3661.737322,322.4910043,646.9965053,184.7021588,82.60815648,135.8333593,60.51229067,2100.988289,-2481.726962,2771.176234,0.5,0,2,2.578127255,1.445068485,-0.903982518,-1.03E+12,-7.94E+12,-8.99E+11,-9.87E+12,23.06162645,0.777305005,0.779379269,2.437232391,10.74190913,3.63E-06,1.30E-04,16.00770154,1187.74859,55811.2652,753.3248983,0.280929128,-1.573327224,-0.9932935,-3.249107644,1.007160108,1.007999668};
                             data = arrlist2arr(Feature_New);
-
-
                             result_sub1 = predict44RF(data);
-                            result_sub1_string = ActionResult((int) result_sub1);
+//                            count_max  = count_max + 1;
+//                            if (count_max == 5) {
+//                                int max = total[0];
+//                                int index = 0;
+//                                for (int l = 0; l < total.length; l++) {
+//                                    if (total[l] > max) {
+//                                        max = total[l];
+//                                        index = l;
+//                                    }
+//                                }
+//                                count_max = 1;
+//                                switch(index) {
+//
+//                                    default:
+//                                        try {
+//                                            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wal);
+//
+//                                            mediaPlayer.start();
+//                                        }
+//                                        catch (Exception e)
+//                                        {
+//                                            System.out.println(e.getMessage().toString());
+//                                        };
+//                                }
+//                            }
+//                            else switch ((int) result_sub1) {
+//                                case 0:
+//                                    total[0] += 1;
+//                                case 1:
+//                                    total[1] += 1;
+//                                case 2:
+//                                    total[2] += 1;
+//                                case 3:
+//                                    total[3] += 1;
+//                                case 4:
+//                                    total[4] += 1;
+//                                case 5:
+//                                    total[5] += 1;
+//                                case 6:
+//                                    total[6] += 1;
+//                                case 7:
+//                                    total[7] += 1;
+//                                case 8:
+//                                    total[8] += 1;
+//                                case 9:
+//                                    total[9] += 1;
+//                                case 10:
+//                                    total[10] += 1;
+//                                case 11:
+//                                    total[11] += 1;
+//                                case 12:
+//                                    total[12] += 1;
+//                                case 13:
+//                                    total[13] += 1;
+//                                case 14:
+//                                    total[14] += 1;
+//                                case 15:
+//                                    total[15] += 1;
+//                            }
+
+
+                            count_max  = count_max + 1;
+                            if (count_max == 6) {
+                                int max = total_11[0];
+                                int index = 0;
+                                for (int l = 0; l < total_11.length; l++) {
+                                    if (total_11[l] > max) {
+                                        max = total_11[l];
+                                        index = l;
+                                    }
+                                }
+                                count_max = 1;
+                                switch(index) {
+
+                                    default:
+                                        try {
+                                            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wal);
+                                            mediaPlayer.start();
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            System.out.println(e.getMessage().toString());
+                                        };
+                                }
+                            }
+                            else switch ((int) result_sub1) {
+                                case 0:
+                                    total_11[0] += 1;
+                                case 1:
+                                    total_11[1] += 1;
+                                case 2:
+                                    total_11[2] += 1;
+                                case 3:
+                                    total_11[3] += 1;
+                                case 4:
+                                    total_11[4] += 1;
+                                case 5:
+                                    total_11[5] += 1;
+                                case 6:
+                                    total_11[6] += 1;
+                                case 7:
+                                    total_11[7] += 1;
+                                case 8:
+                                    total_11[8] += 1;
+                                case 9:
+                                    total_11[9] += 1;
+                                case 10:
+                                    total_11[10] += 1;
+                            }
+
+
+                            result_sub1_string = ActionResult_75_11((int) result_sub1);
                             final_result = FinalResultOne(result_sub1_string);
                             TextView text = findViewById(R.id.result);
                             text.setText(final_result);
@@ -623,7 +810,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     public void run() {
                         ArrayList<AccelData>  Luu_AccelSensor = new ArrayList<AccelData>();
                         next_windows = (int) ((TIME_SITE-OVERLAP_SIZE)*dataCount/TIME_SITE);
-//                        System.out.println("điemau"+ next_windows);
+                        System.out.println("điemau"+ next_windows);
 //                        System.out.println("diemcuoi" + dataCount);
                         for(int i =next_windows; i<dataCount-1; i++)
                         {
@@ -646,6 +833,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
             acc_3 = null;
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mediaPlayer.stop();
+        mediaPlayer.release();
     }
 
     protected float[] lowPass(float[] input, float[] output) {
@@ -736,6 +930,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         {
             return "Nhảy liên tục";
         }
+        else if (sub1.equals("LYI"))
+        {
+            return "Hoạt động được thực hiện trong khoảng thời gian nằm sau ngã ";
+        }
         else if (sub1.equals("SCH"))
         {
             return "Chuyển từ tư thế đứng sang ngồi";
@@ -767,6 +965,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         else return "Không xác định";
     }
 
+
+    public String ActionResult_75_11(int x) {
+        switch (x) {
+            case 0 : return "BSC";
+            case 1 : return "FKL";
+            case 2 : return "FOL";
+            case 3 : return "JOG";
+            case 4 : return "JUM";
+            case 5 : return "SDL";
+            case 6 : return "SIT";
+            case 7 : return "STD";
+            case 8 : return "STN";
+            case 9 : return "STU";
+            case 10 : return "WAL";
+            default : return "No activty predicted";
+        }
+    }
+
     public String ActionResult(int x) {
         switch (x) {
             case 0 : return "BSC";
@@ -777,13 +993,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             case 5 : return "FOL";
             case 6 : return "JOG";
             case 7 : return "JUM";
-            case 8 : return "SCH";
-            case 9 : return "SDL";
-            case 10 : return "SIT";
-            case 11 : return "STD";
-            case 12 : return "STN";
-            case 13 : return "STU";
-            case 14 : return "WAL";
+            case 8 : return "LYI";
+            case 9 : return "SCH";
+            case 10 : return "SDL";
+            case 11 : return "SIT";
+            case 12 : return "STD";
+            case 13 : return "STN";
+            case 14 : return "STU";
+            case 15 : return "WAL";
             default : return "No activty predicted";
         }
     }

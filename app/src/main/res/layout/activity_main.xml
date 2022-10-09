@@ -32,18 +32,10 @@
     <!--        app:layout_constraintTop_toTopOf="parent" />-->
 
 
-<!--    <com.github.mikephil.charting.charts.LineChart-->
-<!--        android:id="@+id/chart1"-->
-<!--        android:layout_width="336dp"-->
-<!--        android:layout_height="116dp">-->
-
-<!--    </com.github.mikephil.charting.charts.LineChart>-->
-    <ImageView
-        android:layout_width="match_parent"
-        android:id="@+id/wave_animation"
-        android:layout_height="116dp">
-
-    </ImageView>
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chart1"
+        android:layout_width="343dp"
+        android:layout_height="167dp"></com.github.mikephil.charting.charts.LineChart>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button2"
@@ -109,7 +101,7 @@
     <TextView
         android:id="@+id/view_text_act"
         android:layout_width="match_parent"
-        android:layout_height="246dp"
+        android:layout_height="176dp"
         android:layout_marginTop="15px"
         android:text="TextView" />
 
