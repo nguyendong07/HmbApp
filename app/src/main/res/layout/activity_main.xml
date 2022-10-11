@@ -45,13 +45,13 @@
         android:height="62dp"
         android:background="@drawable/button_style"
         android:backgroundTint="#68BD1C"
-        android:bottomLeftRadius="10dp"
-        android:bottomRightRadius="10dp"
         android:color="#ffffff"
         android:text="Bắt đầu thu dữ liệu"
         android:textColor="#FFFFFF"
         android:topLeftRadius="10dp"
         android:topRightRadius="10dp"
+        android:bottomLeftRadius="10dp"
+        android:bottomRightRadius="10dp"
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -87,22 +87,23 @@
         android:height="62dp"
         android:background="@drawable/button_style"
         android:backgroundTint="#68BD1C"
-        android:bottomLeftRadius="10dp"
-        android:bottomRightRadius="10dp"
         android:color="#ffffff"
+        android:text="Xem lịch sử"
         android:textColor="#FFFFFF"
         android:topLeftRadius="10dp"
         android:topRightRadius="10dp"
+        android:bottomLeftRadius="10dp"
+        android:bottomRightRadius="10dp"
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:text="Xem kết quả" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/view_text_act"
         android:layout_width="match_parent"
         android:layout_height="176dp"
         android:layout_marginTop="15px"
-        android:text="TextView" />
+        android:textColor="#ffffff"
+        android:text="Chưa có dữ liệu" />
 
 </LinearLayout>

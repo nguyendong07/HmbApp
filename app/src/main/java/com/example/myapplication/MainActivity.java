@@ -78,8 +78,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static int size_w = 128;
     private static double over_lap = 0.8;
     private static final double ALPHA = 0.1d;
+    private static  int [] total_11 = new int [] {0,0,0,0,0,0,0,0,0,0,0};
     private static int next_windows;
-    MediaPlayer mediaPlayer = new MediaPlayer();
+    MediaPlayer mediaPlayer;
 
     private static ArrayList<SimpleAccelData> rawAccelDatas =  new ArrayList<SimpleAccelData>();
     final Handler handler = new Handler();
@@ -514,7 +515,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // 2. create Instances object
         ArrayList<Integer> total = new ArrayList<Integer>();
         feature_test = CreateTestData(features);
-//        System.out.println("kiem tra features" + feature_test.get(2));
         for(int f = 0; f <feature_test.size(); f++) {
             vals[f] = feature_test.get(f);
         }
@@ -524,7 +524,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         testing_data.setClassIndex(testing_data.numAttributes() - 1);
         Instance newInst = testing_data.instance(0);
         testing_data.delete();
-        System.out.println("inst" + newInst);
+
         try {
             result_predict = (int) classifier.classifyInstance(newInst);
 
@@ -595,9 +595,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         if (started) {
             int [] total = new int [] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-            int [] total_11 = new int [] {0,0,0,0,0,0,0,0,0,0,0};
-
-//            TestList.add((double)sensorEvent.values[0]);
             if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 acc_3 = lowPass(sensorEvent.values.clone(), acc_3);
             }
@@ -611,13 +608,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 RawData_New.add(accel);
                 dataCount++;
             }
-//            if (timeInMillis - RawData_New.get(0).getTimestamp() >= WINDOW_TIME_SITE)
-
             if (RawData_New.size()==128) {
-               System.out.println(RawData_New.size());
-
-
-              // System.out.println("Size cua rawdata" + RawData_New.size());
                 for (int k = 0; k < RawData_New.size() ; k++) {
                     X.add(RawData_New.get(k).getX());
                     Y.add(RawData_New.get(k).getY());
@@ -673,69 +664,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             // double[] train_wal ={476.7147436,97.31104498,454.506224,-47.15882139,504.6584476,6824.107517,18450.7015,3661.737322,322.4910043,646.9965053,184.7021588,82.60815648,135.8333593,60.51229067,2100.988289,-2481.726962,2771.176234,0.5,0,2,2.578127255,1.445068485,-0.903982518,-1.03E+12,-7.94E+12,-8.99E+11,-9.87E+12,23.06162645,0.777305005,0.779379269,2.437232391,10.74190913,3.63E-06,1.30E-04,16.00770154,1187.74859,55811.2652,753.3248983,0.280929128,-1.573327224,-0.9932935,-3.249107644,1.007160108,1.007999668};
                             data = arrlist2arr(Feature_New);
                             result_sub1 = predict44RF(data);
-//                            count_max  = count_max + 1;
-//                            if (count_max == 5) {
-//                                int max = total[0];
-//                                int index = 0;
-//                                for (int l = 0; l < total.length; l++) {
-//                                    if (total[l] > max) {
-//                                        max = total[l];
-//                                        index = l;
-//                                    }
-//                                }
-//                                count_max = 1;
-//                                switch(index) {
-//
-//                                    default:
-//                                        try {
-//                                            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wal);
-//
-//                                            mediaPlayer.start();
-//                                        }
-//                                        catch (Exception e)
-//                                        {
-//                                            System.out.println(e.getMessage().toString());
-//                                        };
-//                                }
-//                            }
-//                            else switch ((int) result_sub1) {
-//                                case 0:
-//                                    total[0] += 1;
-//                                case 1:
-//                                    total[1] += 1;
-//                                case 2:
-//                                    total[2] += 1;
-//                                case 3:
-//                                    total[3] += 1;
-//                                case 4:
-//                                    total[4] += 1;
-//                                case 5:
-//                                    total[5] += 1;
-//                                case 6:
-//                                    total[6] += 1;
-//                                case 7:
-//                                    total[7] += 1;
-//                                case 8:
-//                                    total[8] += 1;
-//                                case 9:
-//                                    total[9] += 1;
-//                                case 10:
-//                                    total[10] += 1;
-//                                case 11:
-//                                    total[11] += 1;
-//                                case 12:
-//                                    total[12] += 1;
-//                                case 13:
-//                                    total[13] += 1;
-//                                case 14:
-//                                    total[14] += 1;
-//                                case 15:
-//                                    total[15] += 1;
-//                            }
-
 
                             count_max  = count_max + 1;
-                            if (count_max == 6) {
+                            System.out.println("Count_max" + count_max);
+                            if (count_max == 15) {
                                 int max = total_11[0];
                                 int index = 0;
                                 for (int l = 0; l < total_11.length; l++) {
@@ -745,76 +677,103 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                     }
                                 }
                                 count_max = 1;
+                                total_11 = new int[total_11.length];
+
                                 switch(index) {
                                     case 0:
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.bsc);
                                         mediaPlayer.start();
+                                        break;
                                      case 1:
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.fol_fkl);
                                         mediaPlayer.start();
+                                         break;
                                      case 2:
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.fol_fkl);
                                         mediaPlayer.start();
+                                        break;
                                      case 3:
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.jog);
                                         mediaPlayer.start();
+                                        break;
                                      case 4:
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.jum);
                                         mediaPlayer.start();
+                                        break;
                                      case 5:
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sdl);
                                         mediaPlayer.start();
+                                        break;
                                      case 6:
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sit);
                                         mediaPlayer.start();
+                                        break;
                                      case 7:
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.std);
                                         mediaPlayer.start();
+                                         break;
                                      case 8:
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.stn);
                                         mediaPlayer.start();
+                                         break;
                                      case 9:
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.stu);
                                         mediaPlayer.start();
+                                         break;
                                       case 10:
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wal);
-                                        mediaPlayer.start(); 
+                                        mediaPlayer.start();
+                                          break;
                                     default:
-                                       System.out.println("no error");
-                                        // try {
-                                        //     mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wal);
-                                        //     mediaPlayer.start();
-                                        // }
-                                        // catch (Exception e)
-                                        // {
-                                        //     System.out.println(e.getMessage().toString());
-                                        // };
+                                         try {
+                                             mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wal);
+                                             mediaPlayer.start();
+                                             break;
+                                         }
+                                         catch (Exception e)
+                                         {
+                                             System.out.println(e.getMessage().toString());
+                                         };
                                 }
                             }
-                            else switch ((int) result_sub1) {
+                            System.out.println("rs" + result_sub1);
+                             switch ((int) result_sub1) {
                                 case 0:
-                                    total_11[0] += 1;
+                                    total_11[0] = total_11[0] + 1;
+                                    break;
                                 case 1:
-                                    total_11[1] += 1;
+                                    total_11[1] = total_11[1] + 1;
+                                    break;
                                 case 2:
-                                    total_11[2] += 1;
+                                    total_11[2] = total_11[2] + 1;
+                                    break;
                                 case 3:
-                                    total_11[3] += 1;
+                                    total_11[3] = total_11[3] + 1;
+                                    break;
                                 case 4:
-                                    total_11[4] += 1;
+                                    total_11[4] = total_11[4] + 1;
+                                    break;
                                 case 5:
-                                    total_11[5] += 1;
+                                    total_11[5] = total_11[5] + 1;
+                                    break;
                                 case 6:
-                                    total_11[6] += 1;
+                                    total_11[6] = total_11[6] + 1;
+                                    break;
                                 case 7:
-                                    total_11[7] += 1;
+                                    total_11[7] = total_11[7] + 1;
+                                    break;
                                 case 8:
-                                    total_11[8] += 1;
+                                    total_11[8] = total_11[8] + 1;
+                                    break;
                                 case 9:
-                                    total_11[9] += 1;
+                                    total_11[9] = total_11[9] + 1;
+                                    break;
                                 case 10:
-                                    total_11[10] += 1;
+                                    total_11[10] = total_11[10] + 1;
+                                    break;
                             }
+
+
 
 
                             result_sub1_string = ActionResult_75_11((int) result_sub1);
@@ -843,7 +802,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     public void run() {
                         ArrayList<AccelData>  Luu_AccelSensor = new ArrayList<AccelData>();
                         next_windows = (int) ((TIME_SITE-OVERLAP_SIZE)*dataCount/TIME_SITE);
-                        System.out.println("điemau"+ next_windows);
+                       // System.out.println("điemau"+ next_windows);
 //                        System.out.println("diemcuoi" + dataCount);
                         for(int i =next_windows; i<dataCount-1; i++)
                         {
@@ -853,7 +812,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         RawData_New = new ArrayList<AccelData>();
                         for(int j =0; j<Luu_AccelSensor.size(); j++) {
                             RawData_New.add(Luu_AccelSensor.get(j));
-
                         }
                         dataCount = RawData_New.size();
                         //System.out.println("size cua array x" + RawData_New.size());
