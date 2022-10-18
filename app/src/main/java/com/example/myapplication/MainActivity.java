@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static  int [] total_11 = new int [] {0,0,0,0,0,0,0,0,0,0,0,0};
     private static int next_windows;
     MediaPlayer mediaPlayer;
+    public static boolean view_act_status = false;
 
     private static ArrayList<SimpleAccelData> rawAccelDatas =  new ArrayList<SimpleAccelData>();
     final Handler handler = new Handler();
@@ -151,9 +153,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         view_activity.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 view_activity.setText("Xem lịch sử");
-                ViewAct();
-                TextView text = findViewById(R.id.result);
-                text.setText("Chưa có dữ liệu");
+                if (view_act_status == true) {
+                    ViewAct();
+
+
+//                    ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+//                    Toast.makeText(contextWrapper, "Dừng thu dữ liệu trước khi xem!", Toast.LENGTH_LONG).show();
+                }
+                else if (List_Action.size() == 0){
+                    ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+                    Toast.makeText(contextWrapper, "Chưa có dữ liệu mới", Toast.LENGTH_LONG).show();
+                }
+                else if (List_Action.size() > 0 ){
+                    ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+                    Toast.makeText(contextWrapper, "Dừng thu dữ liệu trước khi xem!", Toast.LENGTH_LONG).show();
+                }
+
+//                TextView text = findViewById(R.id.result);
+//                text.setText("Chưa có dữ liệu");
             }
         });
 
@@ -163,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 started = false;
                 RawData_New.clear();
                 button.setText("Thu dữ liệu");
+                view_act_status = true;
                 view_activity.setEnabled(true);
             }});
 
@@ -179,7 +197,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //                }
                 button.setText("Đang thu dữ liệu");
                 TextView ts = (TextView) findViewById(R.id.view_text_act);
-                view_activity.setEnabled(false);
+                view_act_status = false;
+                //view_activity.setEnabled(false);
+
                 ts.setText("");
                 handler.postDelayed(new Runnable() {
                     @Override
@@ -327,23 +347,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //                    act += information[m] + " "+"end";
 //                }
 //            }
-            if (List_Action.size() != 0 && List_Action.size() > 11) {
-                for (int m =  List_Action.size()-10 ; m < List_Action.size() ; m++) {
+            if (List_Action.size() != 0 && List_Action.size() > 5) {
+                for (int m =  List_Action.size()-5; m < List_Action.size() ; m++) {
                     act += List_Action.get(m) + " ";
-                    if(m == List_Action.size() - 10) {
-                        act += List_Action.get(m) + " "+"end";
+                    if(m == List_Action.size() - 5) {
+                        act += List_Action.get(m) + " ";
                     }
                 }
             }
-            else  if (List_Action.size() != 0 && List_Action.size() < 11) {
+            else {
                 for (int m =  0 ; m < List_Action.size() ; m++) {
                     act += List_Action.get(m) + " ";
-                    if(m == List_Action.size() - 10) {
-                        act += List_Action.get(m) + " "+"end";
+                    if(m == List_Action.size() - 5) {
+                        act += List_Action.get(m) + " ";
                     }
                 }
             }
-            else act = "";
+
 
             ts.setText(act);
 
@@ -709,7 +729,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 result_sub1_string = ActionResult_75_11(index);
                                 final_result = FinalResultOne(result_sub1_string);
                                 TextView text = findViewById(R.id.result);
-                                List_Action.add(final_result);
+                                List_Action.add(result_sub1_string);
                                 System.out.println("list size" + List_Action.size());
                                 text.setText(final_result);
 
@@ -868,15 +888,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             }
 
 
-                            try {
-                                String lineSeparator = System.getProperty("line.separator");
-
-                                fos.write(inketqua.getBytes(StandardCharsets.UTF_8));
-                                fos.write(lineSeparator.getBytes());
-
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+//                            try {
+//                                String lineSeparator = System.getProperty("line.separator");
+//
+//                                fos.write(inketqua.getBytes(StandardCharsets.UTF_8));
+//                                fos.write(lineSeparator.getBytes());
+//
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
 
                         }
 

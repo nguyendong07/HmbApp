@@ -58,18 +58,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view" />
 
-    <TextView
-        android:id="@+id/resultView"
-        android:layout_width="351dp"
-        android:layout_height="49dp"
-        android:layout_marginTop="10sp"
-        android:text="Hành động đoán được"
-        android:textAlignment="center"
-        android:textColor="#F4F1F1"
-        android:textSize="24sp"
-        app:layout_constraintTop_toTopOf="parent" />
+<!--    <TextView-->
+<!--        android:id="@+id/resultView"-->
+<!--        android:layout_width="351dp"-->
+<!--        android:layout_height="49dp"-->
+<!--        android:layout_marginTop="10sp"-->
+<!--        android:text="Hành động đoán được"-->
+<!--        android:textAlignment="center"-->
+<!--        android:textColor="#F4F1F1"-->
+<!--        android:textSize="24sp"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
 
     <TextView
+        android:layout_marginTop="10dp"
         android:id="@+id/result"
         android:layout_width="match_parent"
         android:layout_height="48dp"
@@ -84,10 +85,10 @@
 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="18dp"
         android:height="62dp"
         android:background="@drawable/button_style"
-        android:backgroundTint="#F6CE2B"
+        android:backgroundTint="#68BD1C"
         android:bottomLeftRadius="10dp"
         android:bottomRightRadius="10dp"
         android:color="#F6CE2B"
@@ -102,30 +103,40 @@
     <androidx.appcompat.widget.AppCompatButton
 
         android:id="@+id/view_act"
-
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="18dp"
         android:height="62dp"
         android:background="@drawable/button_style"
         android:backgroundTint="#4296D6"
+        android:bottomLeftRadius="10dp"
+        android:bottomRightRadius="10dp"
+        android:topLeftRadius="10dp"
+        android:topRightRadius="10dp"
         android:color="#ffffff"
         android:text="Xem lịch sử"
         android:textColor="#FFFFFF"
-        android:topLeftRadius="10dp"
-        android:topRightRadius="10dp"
-        android:bottomLeftRadius="10dp"
-        android:bottomRightRadius="10dp"
+
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/view_text_act"
-        android:layout_width="351dp"
-        android:layout_height="62dp"
-        android:layout_marginTop="15px"
-        android:text="Chưa có dữ liệu"
-        android:textColor="#ffffff" />
+        android:layout_width="match_parent"
+        android:layout_height="89dp"
+        android:layout_marginTop="22dp"
+        android:background="@drawable/button_style"
+        android:backgroundTint="#ffffff"
+        android:bottomLeftRadius="10dp"
+        android:bottomRightRadius="10dp"
+        android:fontStyle="normal"
+        android:paddingLeft="30dp"
+        android:paddingTop="15dp"
+        android:paddingRight="30dp"
+        android:textColor="@color/black"
+        android:textSize="70px"
+        android:topLeftRadius="10dp"
+        android:topRightRadius="10dp" />
 
 </LinearLayout>
