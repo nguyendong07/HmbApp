@@ -63,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private Sensor sensor;
     private Sensor accelerometer;
+    private Sensor gyroscope;
+    private Sensor magnetometer;
     private static boolean started;
     private static long timeInMillis;
     private static int result_predict;
@@ -78,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static int size_w = 128;
     private static double over_lap = 0.8;
     private static final double ALPHA = 0.1d;
-    private static  int [] total_11 = new int [] {0,0,0,0,0,0,0,0,0,0,0};
+    private static  int [] total_11 = new int [] {0,0,0,0,0,0,0,0,0,0,0,0};
     private static int next_windows;
     MediaPlayer mediaPlayer;
 
@@ -113,7 +115,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+//        gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+//        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
         sensorManager.registerListener(MainActivity.this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+//        sensorManager.registerListener(MainActivity.this, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+//        sensorManager.registerListener(MainActivity.this, magnetometer, SensorManager.SENSOR_DELAY_FASTEST);
+
         List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
         for(int i=0; i<sensors.size(); i++){
             Log.d(TAG, "onCreate: Sensor "+ i + ": " + sensors.get(i).toString());
@@ -138,32 +146,41 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
 
-        ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
-        File directory = contextWrapper.getDir("result" , Context.MODE_PRIVATE);
+
         Button view_activity = (Button) findViewById(R.id.view_act);
         view_activity.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                view_activity.setText("Xem kết quả");
+                view_activity.setText("Xem lịch sử");
                 ViewAct();
+                TextView text = findViewById(R.id.result);
+                text.setText("Chưa có dữ liệu");
             }
         });
+
+        Button stop_record = (Button) findViewById(R.id.stop_record);
+        stop_record.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                started = false;
+                RawData_New.clear();
+                button.setText("Thu dữ liệu");
+                view_activity.setEnabled(true);
+            }});
 
         button = (Button) findViewById(R.id.button2);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-//                ImageView rocketImage = (ImageView) findViewById(R.id.wave_animation);
-//                rocketImage.setBackgroundResource(R.drawable.movie);
-//                Drawable rocketAnimation = rocketImage.getBackground();
-//                if (rocketAnimation instanceof Animatable) {
-//                    ((Animatable)rocketAnimation).start();
+//                ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+//                File directory = contextWrapper.getDir("result", Context.MODE_PRIVATE);
+//                myInternalFile = new File(directory,   "activity_" + turn + ".txt" );
+//                try {
+//                    fos = new FileOutputStream(myInternalFile);
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
 //                }
-                myInternalFile = new File(directory,   "activity_" + turn + ".txt" );
-                try {
-                    fos = new FileOutputStream(myInternalFile);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
                 button.setText("Đang thu dữ liệu");
+                TextView ts = (TextView) findViewById(R.id.view_text_act);
+                view_activity.setEnabled(false);
+                ts.setText("");
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -223,6 +240,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         leftAxis.setAxisMinimum(0f);
         leftAxis.setDrawGridLines(true);
 
+
+
         YAxis rightAxis = mChart.getAxisRight();
         rightAxis.setEnabled(false);
 
@@ -251,7 +270,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void addEntry(SensorEvent event) {
 
         LineData data = mChart.getData();
-
         if (data != null) {
 
             ILineDataSet set = data.getDataSetByIndex(0);
@@ -278,13 +296,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public void ViewAct() {
-        started = !started;
-        RawData_New.clear();
-        button.setText("Thu dữ liệu");
+
         dataCount=0;
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
         StringBuilder sb = new StringBuilder();
-        String [] information = new String [] {};
         try {
             File directory = contextWrapper.getDir("result" , Context.MODE_PRIVATE);
             myInternalFile = new File(directory, "activity_" + turn + ".txt");
@@ -304,7 +319,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            information = sb.toString().split(" ");
             TextView ts = (TextView) findViewById(R.id.view_text_act);
             String act ="";
 //            for (int m = 0; m < information.length; m++) {
@@ -313,13 +327,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //                    act += information[m] + " "+"end";
 //                }
 //            }
-
-            for (int m = 0; m < List_Action.size(); m++) {
-                act += List_Action.get(m) + " ";
-                if(m == List_Action.size()-1) {
-                    act += List_Action.get(m) + " "+"end";
+            if (List_Action.size() != 0 && List_Action.size() > 11) {
+                for (int m =  List_Action.size()-10 ; m < List_Action.size() ; m++) {
+                    act += List_Action.get(m) + " ";
+                    if(m == List_Action.size() - 10) {
+                        act += List_Action.get(m) + " "+"end";
+                    }
                 }
             }
+            else  if (List_Action.size() != 0 && List_Action.size() < 11) {
+                for (int m =  0 ; m < List_Action.size() ; m++) {
+                    act += List_Action.get(m) + " ";
+                    if(m == List_Action.size() - 10) {
+                        act += List_Action.get(m) + " "+"end";
+                    }
+                }
+            }
+            else act = "";
 
             ts.setText(act);
 
@@ -632,25 +656,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         Y.clear();
                         Z.clear();
                         T.clear();
+
                         arr_x = Arrays.copyOfRange(x, 0, size_w);
                         arr_y = Arrays.copyOfRange(y, 0, size_w);
                         arr_z = Arrays.copyOfRange(z, 0, size_w);
                         arr_t = Arrays.copyOfRange(t, 0, size_w);
+//                        x = null;
+//                        y = null;
+//                        z = null;
+//                        t = null;
                         for (int j = 0; j < 1; j++) {
-//                            if (j == 0) {
-//                                arr_x = Arrays.copyOfRange(x, 0, size_w);
-//                                arr_y = Arrays.copyOfRange(y, 0, size_w);
-//                                arr_z = Arrays.copyOfRange(z, 0, size_w);
-//                                arr_t = Arrays.copyOfRange(t, 0, size_w);
-//                            } else if (j > 0) {
-//                                arr_x = Arrays.copyOfRange(x, (int) (j * size_w * (1 - over_lap)), (int) (j * size_w * (1 - over_lap) + size_w));
-//                                arr_y = Arrays.copyOfRange(y, (int) (j * size_w * (1 - over_lap)), (int) (j * size_w * (1 - over_lap) + size_w));
-//                                arr_z = Arrays.copyOfRange(z, (int) (j * size_w * (1 - over_lap)), (int) (j * size_w * (1 - over_lap) + size_w));
-//                                arr_t = Arrays.copyOfRange(t, (int) (j * size_w * (1 - over_lap)), (int) (j * size_w * (1 - over_lap) + size_w));
-//                            }
                             arr_x = filter(x);
                             arr_y = filter(y);
                             arr_z = filter(z);
+                            x = null;
+                            y = null;
+                            z = null;
+
 
                             arr_x = lowFilter(arr_x, j, endSignal[0]);
                             arr_y = lowFilter(arr_y, j, endSignal[1]);
@@ -661,13 +683,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             powerFeatures.setAcc(windowData);
                             powerFeatures.analysisRMS();
                             Feature_New = Get44Features(arr_x, arr_y, arr_z, arr_t);
+                            arr_x = null;
+                            arr_y = null;
+                            arr_z = null;
+                            arr_t = null;
                             // double[] train_wal ={476.7147436,97.31104498,454.506224,-47.15882139,504.6584476,6824.107517,18450.7015,3661.737322,322.4910043,646.9965053,184.7021588,82.60815648,135.8333593,60.51229067,2100.988289,-2481.726962,2771.176234,0.5,0,2,2.578127255,1.445068485,-0.903982518,-1.03E+12,-7.94E+12,-8.99E+11,-9.87E+12,23.06162645,0.777305005,0.779379269,2.437232391,10.74190913,3.63E-06,1.30E-04,16.00770154,1187.74859,55811.2652,753.3248983,0.280929128,-1.573327224,-0.9932935,-3.249107644,1.007160108,1.007999668};
                             data = arrlist2arr(Feature_New);
                             result_sub1 = predict44RF(data);
+                            data = null;
 
                             count_max  = count_max + 1;
                             System.out.println("Count_max" + count_max);
-                            if (count_max == 15) {
+                            String inketqua = "";
+                            if (count_max == 14) {
                                 int max = total_11[0];
                                 int index = 0;
                                 for (int l = 0; l < total_11.length; l++) {
@@ -678,52 +706,115 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 }
                                 count_max = 1;
                                 total_11 = new int[total_11.length];
+                                result_sub1_string = ActionResult_75_11(index);
+                                final_result = FinalResultOne(result_sub1_string);
+                                TextView text = findViewById(R.id.result);
+                                List_Action.add(final_result);
+                                System.out.println("list size" + List_Action.size());
+                                text.setText(final_result);
 
                                 switch(index) {
                                     case 0:
+                                        try {
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.bsc);
                                         mediaPlayer.start();
                                         break;
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            System.out.println(e.getMessage().toString());
+                                        };
                                      case 1:
+                                    case 2:
+                                        try {
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.fol_fkl);
                                         mediaPlayer.start();
                                          break;
-                                     case 2:
-                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.fol_fkl);
-                                        mediaPlayer.start();
-                                        break;
-                                     case 3:
-                                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.jog);
-                                        mediaPlayer.start();
-                                        break;
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            System.out.println(e.getMessage().toString());
+                                        };
+                                    case 3:
+                                        try {
+                                            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.jog);
+                                            mediaPlayer.start();
+                                            break;
+                                        }
+                                         catch (Exception e)
+                                            {
+                                                System.out.println(e.getMessage().toString());
+                                            };
                                      case 4:
+                                         try {
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.jum);
                                         mediaPlayer.start();
                                         break;
+                                         }
+                                         catch (Exception e)
+                                         {
+                                             System.out.println(e.getMessage().toString());
+                                         };
                                      case 5:
+                                         try{
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sdl);
                                         mediaPlayer.start();
                                         break;
+                                         }
+                                         catch (Exception e)
+                                         {
+                                             System.out.println(e.getMessage().toString());
+                                         };
                                      case 6:
+                                         try{
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sit);
                                         mediaPlayer.start();
                                         break;
+                                         }
+                                         catch (Exception e)
+                                         {
+                                             System.out.println(e.getMessage().toString());
+                                         };
                                      case 7:
+                                         try{
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.std);
                                         mediaPlayer.start();
                                          break;
+                                         }
+                                         catch (Exception e)
+                                         {
+                                             System.out.println(e.getMessage().toString());
+                                         };
                                      case 8:
+                                         try{
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.stn);
                                         mediaPlayer.start();
                                          break;
+                                         }
+                                         catch (Exception e)
+                                         {
+                                             System.out.println(e.getMessage().toString());
+                                         };
                                      case 9:
+                                         try{
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.stu);
                                         mediaPlayer.start();
                                          break;
+                                         }
+                                         catch (Exception e)
+                                         {
+                                             System.out.println(e.getMessage().toString());
+                                         };
                                       case 10:
+                                          try{
                                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wal);
                                         mediaPlayer.start();
                                           break;
+                                          }
+                                          catch (Exception e)
+                                          {
+                                              System.out.println(e.getMessage().toString());
+                                          };
                                     default:
                                          try {
                                              mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wal);
@@ -771,25 +862,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 case 10:
                                     total_11[10] = total_11[10] + 1;
                                     break;
+                                case 11:
+                                    total_11[11] = total_11[11] + 1;
+                                    break;
                             }
 
 
-
-
-                            result_sub1_string = ActionResult_75_11((int) result_sub1);
-                            final_result = FinalResultOne(result_sub1_string);
-                            TextView text = findViewById(R.id.result);
-                            text.setText(final_result);
-                            List_Action.add(ActionResult((int) result_sub1));
                             try {
                                 String lineSeparator = System.getProperty("line.separator");
 
-                                fos.write(ActionResult((int) result_sub1).getBytes(StandardCharsets.UTF_8));
+                                fos.write(inketqua.getBytes(StandardCharsets.UTF_8));
                                 fos.write(lineSeparator.getBytes());
 
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+
                         }
 
                     }
@@ -802,24 +890,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     public void run() {
                         ArrayList<AccelData>  Luu_AccelSensor = new ArrayList<AccelData>();
                         next_windows = (int) ((TIME_SITE-OVERLAP_SIZE)*dataCount/TIME_SITE);
-                       // System.out.println("điemau"+ next_windows);
-//                        System.out.println("diemcuoi" + dataCount);
                         for(int i =next_windows; i<dataCount-1; i++)
                         {
-
                             Luu_AccelSensor.add(RawData_New.get(i));
                         }
-                        RawData_New = new ArrayList<AccelData>();
+                        RawData_New.clear();
                         for(int j =0; j<Luu_AccelSensor.size(); j++) {
                             RawData_New.add(Luu_AccelSensor.get(j));
                         }
                         dataCount = RawData_New.size();
-                        //System.out.println("size cua array x" + RawData_New.size());
                     }
                 };
-
                 th1.start();
                 th2.start();
+//                th1.interrupt();
+//                th2.interrupt();
 
             }
             acc_3 = null;
@@ -857,13 +942,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void feedMultiple() {
-
         if (thread != null){
             thread.interrupt();
         }
-
         thread = new Thread(new Runnable() {
-
             @Override
             public void run() {
                 while (true){
@@ -891,7 +973,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public String FinalResultOne(String sub1) {
         if (sub1.equals("BSC"))
         {
-            return "Ngã về phía sau khi cố gắng ngồi trên ghế";
+            return "Ngã sau";
         }
         else if (sub1.equals("CHU"))
         {
@@ -899,7 +981,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         else if (sub1.equals("CSI"))
         {
-            return "Bước lên ô tô";
+            return "Lên ô tô";
         }
         else if (sub1.equals("CSO"))
         {
@@ -907,11 +989,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         else if (sub1.equals("FKL"))
         {
-            return "Ngã về phía trước khi đứng, tác động đầu tiên vào đầu gối";
+            return "Ngã trước";
         }
         else if (sub1.equals("FOL"))
         {
-            return "Ngã Về phía trước khi đứng, sử dụng tay để giảm bớt ngã";
+            return "Ngã trước";
         }
         else if (sub1.equals("JOG"))
         {
@@ -919,27 +1001,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         else if (sub1.equals("JUM"))
         {
-            return "Nhảy liên tục";
+            return "Nhảy";
         }
         else if (sub1.equals("LYI"))
         {
-            return "Hoạt động được thực hiện trong khoảng thời gian nằm sau ngã ";
+            return "Sau ngã";
         }
         else if (sub1.equals("SCH"))
         {
-            return "Chuyển từ tư thế đứng sang ngồi";
+            return "Đứng sang ngồi";
         }
         else if (sub1.equals("SDL"))
         {
-            return "Ngã sang một bên khi đứng, uốn cong chân";
+            return "Ngã sang";
         }
         else if (sub1.equals("SIT"))
         {
-            return "Ngồi trên ghế với những chuyển động nhỏ";
+            return "Ngồi";
         }
         else if (sub1.equals("STD"))
         {
-            return "Đứng với những chuyển động tinh tế";
+            return "Đứng";
         }
         else if (sub1.equals("STN"))
         {

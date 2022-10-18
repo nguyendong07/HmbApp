@@ -34,12 +34,13 @@
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart1"
-        android:layout_width="343dp"
+        android:layout_width="match_parent"
+
         android:layout_height="167dp"></com.github.mikephil.charting.charts.LineChart>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button2"
-        android:layout_width="351dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
         android:height="62dp"
@@ -79,14 +80,35 @@
 
     <androidx.appcompat.widget.AppCompatButton
 
-        android:id="@+id/view_act"
+        android:id="@+id/stop_record"
 
-        android:layout_width="351dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
         android:height="62dp"
         android:background="@drawable/button_style"
-        android:backgroundTint="#68BD1C"
+        android:backgroundTint="#F6CE2B"
+        android:bottomLeftRadius="10dp"
+        android:bottomRightRadius="10dp"
+        android:color="#F6CE2B"
+        android:text="Dừng thu"
+        android:textColor="#FFFFFF"
+        android:topLeftRadius="10dp"
+        android:topRightRadius="10dp"
+        app:cornerRadius="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+
+        android:id="@+id/view_act"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:height="62dp"
+        android:background="@drawable/button_style"
+        android:backgroundTint="#4296D6"
         android:color="#ffffff"
         android:text="Xem lịch sử"
         android:textColor="#FFFFFF"
@@ -100,10 +122,10 @@
 
     <TextView
         android:id="@+id/view_text_act"
-        android:layout_width="match_parent"
-        android:layout_height="176dp"
+        android:layout_width="351dp"
+        android:layout_height="62dp"
         android:layout_marginTop="15px"
-        android:textColor="#ffffff"
-        android:text="Chưa có dữ liệu" />
+        android:text="Chưa có dữ liệu"
+        android:textColor="#ffffff" />
 
 </LinearLayout>
